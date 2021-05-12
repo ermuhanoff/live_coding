@@ -1,0 +1,18 @@
+span.CodeMirror-selectedtext {
+  /* background-color: rgba(54, 53, 88, 0.637); */
+}
+
+.CodeMirror-activeline-gutter > .CodeMirror-linenumber {
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.CodeMirror-foldmarker {
+  color: rgba(255, 255, 255, 0.39);
+  text-shadow: none;
+  font-size: 12px;
+  margin: 0 2px 0 2px;
+}
+
+.CodeMirror-matchingbracket {
+  /* color: rgb(221, 32, 32) */
+}

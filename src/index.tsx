@@ -2,11 +2,9 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./components/App/App";
-import * as dotenv from "dotenv";
+import dotenv from "dotenv";
 
-dotenv.config({ path: __dirname + "/.env" });
-
-console.log(process.env.REACT_APP_HASH);
+dotenv.config();
 
 ReactDOM.render(
   <React.StrictMode>
