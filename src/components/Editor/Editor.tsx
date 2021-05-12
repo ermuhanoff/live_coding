@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import { Controlled } from "react-codemirror2";
 import Options from "./EditorOptions";
-import "./Editor.css";
 import "codemirror/lib/codemirror.css";
-
+import "./Editor.css";
 
 const Editor = () => {
   const [value, setValue] = useState<string>("let str = 'Hello World!';\n");
@@ -16,6 +15,7 @@ const Editor = () => {
 
   return (
     <Controlled
+      className={"CodeMirror"}
       value={value}
       options={Options}
       onBeforeChange={onBeforeChange}

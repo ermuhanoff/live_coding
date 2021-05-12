@@ -23,7 +23,7 @@ import "codemirror/theme/ayu-mirage.css";
 import "codemirror/addon/dialog/dialog";
 import "codemirror/addon/dialog/dialog.css";
 import { JSHINT } from "jshint";
-import CodeMirror, { EditorConfiguration, ShowHintOptions, HintFunction } from "codemirror";
+import { EditorConfiguration } from "codemirror";
 
 (window as any).JSHINT = JSHINT;
 
@@ -32,12 +32,6 @@ export default {
     theme: "ayu-mirage",
     lint: true,
     lineNumbers: true,
-    hintOptions: {
-        tables: {
-            users: ["name", "score", "birthDate"],
-            countries: ["name", "population", "size"]
-        }
-    } as ShowHintOptions,
     // lineSeparator: "",
     indentUnit: 2,
     smartIndent: true, //

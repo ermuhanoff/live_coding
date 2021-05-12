@@ -1,0 +1,11 @@
+.WorkSpace {
+  display: flex;
+  height: 100%;
+}
+
+.WorkSpace__wrapper_vertical {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}

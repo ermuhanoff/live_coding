@@ -16,3 +16,7 @@ span.CodeMirror-selectedtext {
 .CodeMirror-matchingbracket {
   /* color: rgb(221, 32, 32) */
 }
+
+.CodeMirror { 
+  height: 100%;
+}
