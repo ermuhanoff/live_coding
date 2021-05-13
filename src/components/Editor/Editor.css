@@ -17,6 +17,10 @@ span.CodeMirror-selectedtext {
   /* color: rgb(221, 32, 32) */
 }
 
-.CodeMirror { 
+.CodeMirror {
   height: 100%;
+}
+
+.CodeMirror-scroll {
+  overflow: auto !important;
 }

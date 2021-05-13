@@ -1,19 +1,17 @@
 import React, { ReactNode } from "react";
-import { Tree, Popover } from "antd";
+import { Tree } from "antd";
+import ContextMenu from "../ContextMenu/ContextMenu";
 import Style from "./FileManager.module.css";
 const { DirectoryTree } = Tree;
-
-interface Props {
-  treeData: TreeData;
-}
-
+// interface Props {
+//   treeData: TreeData;
+// }
 interface TreeData {
   title: string | ReactNode;
   key: string;
   isLeaf?: boolean;
   children?: TreeData[];
 }
-
 class TreeDataItem implements TreeData {
   title: string | ReactNode;
   key: string;
@@ -21,11 +19,7 @@ class TreeDataItem implements TreeData {
   children?: TreeData[];
 
   constructor(props: TreeData) {
-    this.title = (
-      <Popover placement="rightBottom" content={"content"} title="Context Menu" trigger="contextMenu">
-        {props.title}
-      </Popover>
-    );
+    this.title = <ContextMenu>{props.title}</ContextMenu>;
     this.key = props.key;
     this.isLeaf = props.isLeaf;
     this.children = props.children;

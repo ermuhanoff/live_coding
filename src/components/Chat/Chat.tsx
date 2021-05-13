@@ -42,7 +42,7 @@ const Chat = () => {
           Send Message
         </Button>
       </div>
-      {/* <div>
+      <div>
         <Draggable
         //   axis="x"
           handle=".handle"
@@ -58,7 +58,7 @@ const Chat = () => {
             <div>This readme is really dragging on...</div>
           </div>
         </Draggable>
-      </div> */}
+      </div>
     </div>
   );
 };
