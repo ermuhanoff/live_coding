@@ -1,0 +1,13 @@
+.WorkSpaceItem {
+}
+
+.WorkSpaceItem_Resizer {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  height: 100%;
+  width: 1px;
+  background-color: #f00;
+  cursor: e-resize;
+  z-index: 1;
+}

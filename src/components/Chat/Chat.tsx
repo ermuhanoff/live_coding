@@ -15,14 +15,18 @@ const Chat = () => {
   const [messagesList, setMessagesList] = useState<ReactNode[]>(messages);
   const [inputText, setInputText] = useState<string>("");
 
-  const onClick = () => {
-    setMessagesList((prevState) => {
-      const newState = [...prevState];
-      newState.push(<ChatMessage content={inputText} title={"Voloday"} />);
+  const onClick = (e: any) => {
+    e.preventDefault();
 
-      return newState;
-    });
-    setInputText("");
+    if (inputText !== "") {
+      setMessagesList((prevState) => {
+        const newState = [...prevState];
+        newState.push(<ChatMessage content={inputText} title={"Voloday"} />);
+
+        return newState;
+      });
+      setInputText("");
+    }
   };
 
   return (
@@ -37,12 +41,14 @@ const Chat = () => {
           onChange={(e) => {
             setInputText(e.target.value);
           }}
+          onPressEnter={onClick}
+          autoSize={{ maxRows: 1, minRows: 1 }}
         />
         <Button type="primary" onClick={onClick} style={{ marginTop: 10 }}>
           Send Message
         </Button>
       </div>
-      <div>
+      {/* <div>
         <Draggable
         //   axis="x"
           handle=".handle"
@@ -58,7 +64,7 @@ const Chat = () => {
             <div>This readme is really dragging on...</div>
           </div>
         </Draggable>
-      </div>
+      </div> */}
     </div>
   );
 };

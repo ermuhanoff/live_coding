@@ -26,28 +26,39 @@ const tools = [
   { icon: <SettingOutlined />, name: "settings" },
 ];
 
+const TOOL_PANEL_WIDTH: number = 450;
+
 const ToolPanel = ({ setToolPanelSize }: Props) => {
   const [isOpened, setIsOpened] = useState<boolean>(false);
-  const [openedWindow, setOpenedWindow] = useState<string>("");
+  const [openedTool, setOpenedTool] = useState<string>("");
 
   const toolsToComponents = (tools: Tool[]): ReactNode[] => {
     return tools.map((item) => (
-      <div onClick={(e) => onIconClick(e, item.name)}>{item.icon}</div>
+      <div key={item.name} onClick={(e) => onIconClick(e, item.name)}>
+        {item.icon}
+      </div>
     ));
+  };
+
+  const openToolPanel = (id: string) => {
+    setOpenedTool(id);
+    setIsOpened(true);
+    setToolPanelSize({ width: TOOL_PANEL_WIDTH + "px", height: "100%" });
+  };
+
+  const closeToolPanel = () => {
+    setToolPanelSize({ width: "40px", height: "100%" });
+    setIsOpened(false);
   };
 
   const onIconClick = (e: any, id: string) => {
     if (isOpened) {
-      setToolPanelSize({ width: "40px", height: "100%" });
-      setIsOpened(false);
-    } else {
-      setIsOpened(true);
-      setToolPanelSize({ width: "400px", height: "100%" });
-      setOpenedWindow(id);
-    }
+      if (openedTool != id) openToolPanel(id);
+      else closeToolPanel();
+    } else openToolPanel(id);
   };
 
-  const getComponentByName = (name: string): ReactNode => {
+  const getToolComponentByName = (name: string): ReactNode => {
     if (name === "file") {
       return <FileManager />;
     } else if (name === "chat") {
@@ -64,8 +75,8 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
         {toolsToComponents(tools)}
       </Space>
       {isOpened && (
-        <div className={Style.ToolPanel_FileManager}>
-          {getComponentByName(openedWindow)}
+        <div className={Style.ToolPanel_OpenedTool}>
+          {getToolComponentByName(openedTool)}
         </div>
       )}
     </div>

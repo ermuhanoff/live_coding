@@ -19,7 +19,11 @@ class TreeDataItem implements TreeData {
   children?: TreeData[];
 
   constructor(props: TreeData) {
-    this.title = <ContextMenu>{props.title}</ContextMenu>;
+    this.title = (
+      <ContextMenu data={["Open", "Copy", "Delete", "Rename"]} action={[]}>
+        {props.title}
+      </ContextMenu>
+    );
     this.key = props.key;
     this.isLeaf = props.isLeaf;
     this.children = props.children;

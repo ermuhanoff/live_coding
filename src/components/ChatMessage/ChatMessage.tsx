@@ -15,7 +15,7 @@ const ChatMessage = ({ title, content }: Props) => {
         author={title}
         avatar={<Avatar icon={<UserOutlined />} />}
         content={<p>{content}</p>}
-        datetime={new Date().toLocaleString()}
+        datetime={<div className={Style.ChatMessage_Date}>{new Date().toLocaleTimeString()}</div>}
       />
     </div>
   );

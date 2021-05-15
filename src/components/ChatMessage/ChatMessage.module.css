@@ -1,6 +1,11 @@
 .ChatMessage {
     border-radius: 0.7em;
     background-color: #fff;
-    margin: 20px 15px 20px 30px;
+    margin: 20px 15px 20px 15px;
     padding: 0px 10px;
 }
+
+.ChatMessage_Date {
+    font-size: 0.8em;
+  }
+  

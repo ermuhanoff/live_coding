@@ -5,3 +5,10 @@
 .List_item:hover {
   color: #1890ff;
 }
+
+.ContextMenuPoint {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+}
+
