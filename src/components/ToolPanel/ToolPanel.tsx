@@ -1,12 +1,16 @@
 import React, { useState, ReactNode } from "react";
-import { Space } from "antd";
+import { Space, Badge } from "antd";
 import FileManager from "../FileManager/FileManager";
 import Chat from "../Chat/Chat";
+import NotificationPanel from "../NotificationPanel/NotificationPanel";
+import ClosedNotificationPanel from "../ClosedNotificationPanel/ClosedNotificationPanel";
 import {
   FileOutlined,
   WechatOutlined,
   CameraOutlined,
   SettingOutlined,
+  BellOutlined,
+  BookOutlined,
 } from "@ant-design/icons";
 import Style from "./ToolPanel.module.css";
 
@@ -24,6 +28,23 @@ const tools = [
   { icon: <WechatOutlined />, name: "chat" },
   { icon: <CameraOutlined />, name: "camera" },
   { icon: <SettingOutlined />, name: "settings" },
+
+  {
+    icon: (
+      <Badge
+        className={Style.Badge}
+        count={10}
+        overflowCount={9}
+        size="small"
+        offset={[-5, 0]}
+        title={"Unread messages"}
+      >
+        <BellOutlined className={Style.ToolPanel_Icons} />
+      </Badge>
+    ),
+    name: "notice",
+  },
+  { icon: <BookOutlined />, name: "closed_notice" },
 ];
 
 const TOOL_PANEL_WIDTH: number = 450;
@@ -34,7 +55,7 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
 
   const toolsToComponents = (tools: Tool[]): ReactNode[] => {
     return tools.map((item) => (
-      <div key={item.name} onClick={(e) => onIconClick(e, item.name)}>
+      <div key={item.name} className={Style.Icon} onClick={(e) => onIconClick(e, item.name)}>
         {item.icon}
       </div>
     ));
@@ -47,7 +68,7 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
   };
 
   const closeToolPanel = () => {
-    setToolPanelSize({ width: "40px", height: "100%" });
+    setToolPanelSize({ width: "50px", height: "100%" });
     setIsOpened(false);
   };
 
@@ -59,10 +80,15 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
   };
 
   const getToolComponentByName = (name: string): ReactNode => {
-    if (name === "file") {
-      return <FileManager />;
-    } else if (name === "chat") {
-      return <Chat />;
+    switch (name) {
+      case "file":
+        return <FileManager />;
+      case "chat":
+        return <Chat />;
+      case "notice":
+        return <NotificationPanel />;
+      case "closed_notice":
+        return <ClosedNotificationPanel />;
     }
   };
 
@@ -70,6 +96,7 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
     <div className={Style.Wrapper}>
       <Space
         className={`${Style.ToolPanel_Icons} ${Style.ToolPanel_Space}`}
+        style={{ width: 50 }}
         direction="vertical"
       >
         {toolsToComponents(tools)}

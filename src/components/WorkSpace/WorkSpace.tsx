@@ -1,6 +1,6 @@
 import { useState } from "react";
 import WorkSpaceItem from "../WorkSpaceItem/WorkSpaceItem";
-import Editor from "../Editor/Editor";
+import EditorComponent from "../Editor/Editor";
 import ToolPanel from "../ToolPanel/ToolPanel";
 import OutputWindow from "../OutputWindow/OutputWindow";
 import Style from "./WorkSpace.module.css";
@@ -12,7 +12,7 @@ export interface Size {
 
 const WorkSpace = () => {
   const [toolPanelSize, setToolPanelSize] = useState<Size>({
-    width: "40px",
+    width: "50px",
     height: "100%",
   });
   const [editorSize, setEditorSize] = useState<Size>({
@@ -40,7 +40,7 @@ const WorkSpace = () => {
         nextSize={outputSize}
         setNextSize={setOutputSize}
       >
-        <Editor />
+        <EditorComponent />
       </WorkSpaceItem>
       <WorkSpaceItem
         size={outputSize}
