@@ -142,32 +142,26 @@ const EditorComponent = () => {
   const onContexMenu = (cm: CodeMirror.Editor, e: any) => {
     e.preventDefault();
     editor = cm;
-    let gutterNumber: number = 0;
+    let pos = Editor.coordsChar({ left: e.clientX, top: e.clientY });
 
     x = e.clientX;
     y = e.clientY - 15;
 
-    for (let item in e.path) {
-      if (e.path[item].nodeName === "PRE") {
-        const parent: HTMLDivElement = e.path[item].parentNode;
-        const gutter = parent.children[0];
-        gutterNumber = +gutter.children[0].innerHTML;
-      }
-    }
-
     if (
       !(e.path[0] as HTMLElement).classList.contains("CodeMirror-selectedtext")
     ) {
-      Doc.setCursor({ line: gutterNumber - 1, ch: 0 });
+      Doc.setCursor({ line: pos.line, ch: pos.ch});
     }
 
-    let pos = Doc.getCursor();
+    let cursorPosFrom = Doc.getCursor("from");
+    let cursorPosTo = Doc.getCursor("to");
+
     setContext({
       ...context,
-      noticePos: { line: pos.line, ch: pos.ch },
+      noticePos: { line: cursorPosTo.line, ch: cursorPosTo.ch },
       lineRange: {
-        from: Doc.getCursor("from").line,
-        to: Doc.getCursor("to").line,
+        from: cursorPosFrom.line,
+        to: cursorPosTo.line,
       },
     });
 

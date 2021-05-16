@@ -5,7 +5,7 @@
   background-color: #fff;
 }
 
-.Notice::-webkit-scrollbar {
+::-webkit-scrollbar {
   background-color: transparent;
   width: 10px;
 }
