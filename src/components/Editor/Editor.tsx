@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Controlled } from "react-codemirror2";
 import EditorContextMenu from "../EditorContextMenu/EditorContextMenu";
 
@@ -6,6 +6,7 @@ import Options from "./EditorOptions";
 import "codemirror/lib/codemirror.css";
 import "./Editor.css";
 import CodeMirror from "codemirror";
+import { useAppContext } from "../App/AppContext";
 
 let x: number;
 let y: number;
@@ -14,6 +15,7 @@ export let Editor: CodeMirror.Editor;
 export let Doc: CodeMirror.Doc;
 
 const EditorComponent = () => {
+  const { context, setContext } = useAppContext();
   const [value, setValue] =
     useState<string>(`import React, { useState, ReactNode } from "react";
   import { Space, Badge } from "antd";
@@ -137,20 +139,67 @@ const EditorComponent = () => {
 
   const onChange = (editor: any, data: any, value: string): void => {};
 
-  const onContexMenu = (cm: any, e: any) => {
+  const onContexMenu = (cm: CodeMirror.Editor, e: any) => {
     e.preventDefault();
     editor = cm;
+    let gutterNumber: number = 0;
 
     x = e.clientX;
     y = e.clientY - 15;
 
+    for (let item in e.path) {
+      if (e.path[item].nodeName === "PRE") {
+        const parent: HTMLDivElement = e.path[item].parentNode;
+        const gutter = parent.children[0];
+        gutterNumber = +gutter.children[0].innerHTML;
+      }
+    }
+
+    if (
+      !(e.path[0] as HTMLElement).classList.contains("CodeMirror-selectedtext")
+    ) {
+      Doc.setCursor({ line: gutterNumber - 1, ch: 0 });
+    }
+
+    let pos = Doc.getCursor();
+    setContext({
+      ...context,
+      noticePos: { line: pos.line, ch: pos.ch },
+      lineRange: {
+        from: Doc.getCursor("from").line,
+        to: Doc.getCursor("to").line,
+      },
+    });
+
     setContextMenu(true);
   };
+
+  // useEffect(() => {
+  //     document
+  //     .getElementsByClassName("CodeMirror-overlayscroll-vertical")[0]
+  //     .children[0].addEventListener("mousedown", (event) => {
+  //       const el: any = event.target;
+
+  //       const oldHeight = el.offsetHeight ;
+
+  //       const onMouseMove = (e: any) => {
+  //         console.log(e.target.style.height);
+
+  //         e.target.style.height = oldHeight  + 12 + "px";
+  //       };
+
+  //       el?.addEventListener("mousemove", onMouseMove);
+
+  //       el?.addEventListener("mouseup", () =>
+  //         el.removeEventListener("mousemove", onMouseMove)
+  //       );
+  //     });
+  // }, []);
 
   return (
     <>
       <Controlled
-        className={"CodeMirror"}
+        className={"CodeMirror_custom"}
         value={value}
         options={Options}
         onBeforeChange={onBeforeChange}

@@ -43,8 +43,6 @@ const WorkSpaceItem: FC<Props> = ({
 
     console.log("new:", newPercent);
 
-    
-
     setNextSize({ ...nextSize, width: 100 - newPercent + "%" });
     setSize({ ...size, width: newPercent + "%" });
   };
@@ -54,9 +52,13 @@ const WorkSpaceItem: FC<Props> = ({
   }, []);
 
   return (
-    <div ref={ITEM} className={Style.WorkSpaceItem} style={size}>
+    <div
+      ref={ITEM}
+      className={Style.WorkSpaceItem}
+      style={{ ...size }}
+    >
       {children}
-      <Dragable
+      {/* <Dragable
         axis="x"
         scale={2}
         onStart={onDragStart}
@@ -64,7 +66,7 @@ const WorkSpaceItem: FC<Props> = ({
         onStop={onDragEnd}
       >
         <div className={Style.WorkSpaceItem_Resizer}></div>
-      </Dragable>
+      </Dragable> */}
     </div>
   );
 };

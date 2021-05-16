@@ -1,23 +1,23 @@
-import React from "react";
+import React, { useState } from "react";
 import { List } from "antd";
 import ClosedNotice from "../ClosedNotice/ClosedNotice";
 import Style from "./ClosedNotificationPanel.module.css";
+import { NoticeItem } from "../ToolPanel/ToolPanel";
 
-const data = [
-  <ClosedNotice />,
-  <ClosedNotice />,
-  <ClosedNotice />,
-  <ClosedNotice />,
-  <ClosedNotice />,
-];
+interface Props {
+  data: NoticeItem[];
+  openNotice: (prop: number) => void;
+}
 
-const ClosedNotificationPanel = () => {
+const ClosedNotificationPanel = ({ data, openNotice }: Props) => {
   return (
     <div className={Style.Notice}>
       <List
         dataSource={data}
         renderItem={(item) => (
-          <div className={Style.Notice_Wrapper}>{item}</div>
+          <div className={Style.Notice_Wrapper}>
+            <ClosedNotice data={item} openNotice={openNotice}/>
+          </div>
         )}
         size="small"
       />

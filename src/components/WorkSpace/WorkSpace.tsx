@@ -12,7 +12,7 @@ export interface Size {
 
 const WorkSpace = () => {
   const [toolPanelSize, setToolPanelSize] = useState<Size>({
-    width: "50px",
+    width: "max-content",
     height: "100%",
   });
   const [editorSize, setEditorSize] = useState<Size>({

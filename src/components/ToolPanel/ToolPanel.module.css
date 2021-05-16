@@ -13,11 +13,12 @@
   width: 100%;
   height: 100%;
   justify-content: center;
+  overflow-x: overlay;
 }
 
 .ToolPanel_OpenedTool {
-  width: 100%;
-  height: 100%;
+
+  transition: all 0.02s ease-in;
 }
 
 .Icon {

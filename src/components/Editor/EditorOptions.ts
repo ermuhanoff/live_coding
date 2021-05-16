@@ -22,6 +22,8 @@ import "codemirror/addon/fold/foldgutter.css";
 import "codemirror/theme/ayu-mirage.css";
 import "codemirror/addon/dialog/dialog";
 import "codemirror/addon/dialog/dialog.css";
+import "codemirror/addon/scroll/simplescrollbars";
+import "codemirror/addon/scroll/simplescrollbars.css";
 import { JSHINT } from "jshint";
 import { EditorConfiguration } from "codemirror";
 
@@ -38,6 +40,8 @@ export default {
     tabSize: 2,
     indentWhithTabs: true,
     electricChars: true, //
+    
+    scrollbarStyle: "overlay",
     // specialChars: "",
     // specialCharPlaceholder: () -> {},
     direction: "ltr",
@@ -54,7 +58,6 @@ export default {
         return n;
     },
     fixedGutter: true, //
-    scrollbarStyle: "native",
     coverGutterNextToScrollbar: false, //
     readOnly: false,
     // screenReaderLabel: 'label',
@@ -73,7 +76,7 @@ export default {
     cursorHeight: 1,
     singleCursorHeightPerLine: true,
     resetSelectionOnContextMenu: true,
-    viewportMargin: 0,
+    viewportMargin: Infinity,
     spellcheck: true,
     autocorrect: true,
     // addons

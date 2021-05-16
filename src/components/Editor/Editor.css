@@ -19,9 +19,68 @@ span.CodeMirror-selectedtext {
 
 .CodeMirror {
   height: 100%;
+  width: 100%;
 }
 
 .CodeMirror-scroll {
-  overflow: auto !important;
+  margin-right: 10px !important;
+  margin-bottom: 0;
+  padding-bottom: 0 !important;
+}
+.CodeMirror-scroll::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
+.CodeMirror-overlayscroll-vertical {
+  bottom: 0 !important;
+}
+
+.CodeMirror_custom {
+  height: 100%;
+  width: 100%;
+}
+
+.CodeMirror_custom > div {
+  padding-top: 2px;
+}
+
+.CodeMirror-scroll * {
+  box-sizing: border-box !important;
+}
+
+
+.CodeMirror_notice {
+  width: 100%;
+}
+
+.CodeMirror-overlayscroll-vertical div,
+.CodeMirror-overlayscroll-horizontal div {
+  border-radius: 0;
+  background-color: #1f24306e;
+}
+
+.CodeMirror-overlayscroll-vertical:hover div,
+.CodeMirror-overlayscroll-horizontal:hover div,
+.CodeMirror-overlayscroll-vertical:hover + div,
+.CodeMirror-overlayscroll-horizontal:hover + div + div {
+  background-color: #4e597273;
+}
+.CodeMirror-overlayscroll-vertical:active div,
+.CodeMirror-overlayscroll-horizontal:active div,
+.CodeMirror-overlayscroll-vertical:active + div,
+.CodeMirror-overlayscroll-horizontal:active + div + div {
+  background-color: #4e597273;
+}
+
+.CodeMirror-overlayscroll-vertical {
+  width: 13px !important;
+}
+
+.CodeMirror-overlayscroll-horizontal {
+  height: 13px !important;
+}
+
+.CodeMirror-scrollbar-filler {
+  background-color: #1f24306e;
+}
