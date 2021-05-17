@@ -15,6 +15,8 @@ import "codemirror/addon/selection/active-line";
 import "codemirror/addon/lint/lint"
 import "codemirror/addon/lint/javascript-lint";
 import "codemirror/mode/javascript/javascript";
+import "codemirror/mode/css/css";
+import "codemirror/mode/xml/xml";
 import "codemirror/addon/lint/lint.css";
 import "codemirror/addon/hint/show-hint.css";
 import "codemirror/addon/hint/anyword-hint";
@@ -31,6 +33,9 @@ import { EditorConfiguration } from "codemirror";
 
 export default {
     mode: { name: "javascript", json: true, globalVars: true },
+    hintOptions: {
+        jshint: { esversion: 6 }
+    },
     theme: "ayu-mirage",
     lint: true,
     lineNumbers: true,
@@ -40,7 +45,7 @@ export default {
     tabSize: 2,
     indentWhithTabs: true,
     electricChars: true, //
-    
+
     scrollbarStyle: "overlay",
     // specialChars: "",
     // specialCharPlaceholder: () -> {},

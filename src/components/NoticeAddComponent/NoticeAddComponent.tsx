@@ -3,7 +3,7 @@ import { Button, Drawer, Form, Input, Space } from "antd";
 import { useAppContext } from "../App/AppContext";
 import NoticeEditor from "../NoticeEditor/NoticeEditor";
 import Text from "antd/lib/typography/Text";
-import { Doc } from "../Editor/Editor";
+import { Editor, Monaco } from "../Editor/Editor";
 
 interface Props {
   createNotice: (values: any) => void;
@@ -37,11 +37,11 @@ const NoticeAddComponent = ({ createNotice }: Props) => {
   };
 
   const getValueOfSelection = (): string => {
-    if (Doc === undefined) return "";
+    if (Editor === undefined || !context.isNoticeAddWindowOpened) return "";
     let selectedLinesText: string = "";
 
     for (let i = context.lineRange.from; i < context.lineRange.to + 1; i++) {
-      selectedLinesText += Doc.getLine(i);
+      selectedLinesText += Editor.getModel()?.getLineContent(i);
       if (i != context.lineRange.to) {
         selectedLinesText += "\n";
       }
@@ -119,7 +119,7 @@ const NoticeAddComponent = ({ createNotice }: Props) => {
         <Form.Item {...editorLayout}>
           <NoticeEditor
             value={getValueOfSelection()}
-            lineStart={context.lineRange.from + 1}
+            lineStart={context.lineRange.from}
           />
         </Form.Item>
       </Form>

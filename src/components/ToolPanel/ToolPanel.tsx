@@ -1,4 +1,4 @@
-import { useState, ReactNode } from "react";
+import { useState, ReactNode, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { Space, Badge, Drawer, Button } from "antd";
 import FileManager from "../FileManager/FileManager";
@@ -14,8 +14,8 @@ import {
   BookOutlined,
 } from "@ant-design/icons";
 import Style from "./ToolPanel.module.css";
-import { Doc, Editor } from "../Editor/Editor";
-import { Position } from "codemirror";
+import { Editor, Monaco, scrollInfo } from "../Editor/Editor";
+import { Position, ScrollInfo } from "codemirror";
 import EditorNotice from "../EditorNotice/EditorNotice";
 import { useAppContext } from "../App/AppContext";
 import NoticeAddComponent from "../NoticeAddComponent/NoticeAddComponent";
@@ -31,6 +31,15 @@ export interface NoticeItem {
   desc: string;
   author: string;
   position: Position;
+}
+
+export interface FileInfo {
+  name: string;
+  path: string;
+  type: "folder" | "file";
+  ext?: string;
+  size: number;
+  content: FileInfo[] | string;
 }
 
 interface Tool {
@@ -111,6 +120,50 @@ const data: NoticeItem[] = [
   },
 ];
 
+const directory: FileInfo[] = [
+  {
+    name: "script",
+    path: "/script",
+    type: "folder",
+    size: 0,
+    content: [
+      {
+        name: "index.js",
+        path: "/script/index.js",
+        type: "file",
+        ext: "js",
+        size: 0,
+        content:
+          "function helloWorld(name) {\n\tconsole.log(`${name} is saying hello!`);\n}\n",
+      },
+    ],
+  },
+  {
+    name: "style",
+    path: "/style",
+    type: "folder",
+    size: 0,
+    content: [
+      {
+        name: "style.css",
+        path: "/style/style.css",
+        type: "file",
+        ext: "css",
+        size: 0,
+        content: "body {\n\tmargin: 0;\n\tpadding: 0\n}\n",
+      },
+    ],
+  },
+  {
+    name: "index.html",
+    path: "/index.html",
+    type: "file",
+    ext: "html",
+    size: 0,
+    content: `<!DOCTYPE html>\n<html lang="en">\n\t<head>\n\t</head>\n\t<body>\n\t</body>\n</html>`,
+  },
+];
+
 const TOOL_PANEL_WIDTH: number = 250;
 
 const ToolPanel = ({ setToolPanelSize }: Props) => {
@@ -125,6 +178,7 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
   const [noticeArr, setNoticeArr] = useState<NoticeItem[]>(data);
   const [openedNoticeId, setOpenedNoticeId] = useState<number>(0);
   const [size, setSize] = useState<Size>({ width: "0px", height: "100%" });
+  const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
 
   let tools: Tool[] = [
     { icon: <FileOutlined />, name: "file" },
@@ -153,6 +207,7 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
     setOpenedNoticeId(id);
     setIsNoticeOpened(true);
     scrollToCode(getNoticeFromId(id).position);
+    setContext({ ...context, isSrcollEventActive: true });
   };
 
   const toolsToComponents = (tools: Tool[]): ReactNode[] => {
@@ -168,17 +223,14 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
   };
 
   const scrollToCode = (position: Position) => {
-    oldPos = Doc.getCursor();
-
-    Doc.setSelection(position);
-    Editor.focus();
-
-    newPos = Doc.getCursor();
-    pos = Editor.cursorCoords(true, "page");
-    el = document.createElement("div");
-    el.style.cssText = `position: absolute;`;
-
-    Editor.addWidget(newPos, el, true);
+    // oldPos = Editor.getCursor();
+    // Editor.setSelection(position);
+    // Editor.focus();
+    // newPos = Editor.getCursor();
+    // pos = Editor.cursorCoords(true, "page");
+    // el = document.createElement("div");
+    // el.style.cssText = `position: absolute;`;
+    // Editor.addWidget(newPos, el, true);
   };
 
   const openToolPanel = (id: string) => {
@@ -209,7 +261,7 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
         title: values.Question,
         desc: values.Description,
         author,
-        position: { line: pos.line, ch: pos.ch },
+        position: { line: 0, ch: 0 },
       },
     ]);
     setNoticeCount(noticeArr.length + 1);
@@ -218,7 +270,13 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
   const getToolComponentByName = (name: string): ReactNode => {
     switch (name) {
       case "file":
-        return <FileManager />;
+        return (
+          <FileManager
+            data={directory}
+            expanded={expandedKeys}
+            setExpanded={setExpandedKeys}
+          />
+        );
       case "chat":
         return <Chat />;
       case "notice":
@@ -247,6 +305,23 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
     )[0];
   };
 
+  const getScrollOffset = () => {
+    let pos = { top: 0 };
+    let cursorHeight: number = 12;
+
+    const popover = document.getElementsByClassName("CoolMan")[0];
+
+    if (popover) {
+      const parent: any = popover.closest(".ant-popover ");
+
+      if (parent.offsetTop < parent.offsetHeight + 5) {
+        parent.style.top = pos.top + cursorHeight + "px";
+      } else {
+        parent.style.top = pos.top - parent.offsetHeight + 5 + "px";
+      }
+    }
+  };
+
   return (
     <div className={Style.Wrapper}>
       <Space
@@ -263,6 +338,7 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
 
       {isNoticeOpened && (
         <>
+          {getScrollOffset()}
           {ReactDOM.createPortal(
             <div
               style={{

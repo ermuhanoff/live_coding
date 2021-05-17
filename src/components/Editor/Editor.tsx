@@ -1,216 +1,126 @@
-import React, { useEffect, useState } from "react";
-import { Controlled } from "react-codemirror2";
-import EditorContextMenu from "../EditorContextMenu/EditorContextMenu";
-
-import Options from "./EditorOptions";
-import "codemirror/lib/codemirror.css";
-import "./Editor.css";
-import CodeMirror from "codemirror";
+import React, { useEffect, useRef, useState } from "react";
+import MonacoEditor, { OnMount } from "@monaco-editor/react";
 import { useAppContext } from "../App/AppContext";
 
-let x: number;
-let y: number;
-let editor: any;
-export let Editor: CodeMirror.Editor;
-export let Doc: CodeMirror.Doc;
+type EditorDidMountParams = Parameters<OnMount>;
+
+export let Monaco: EditorDidMountParams[1];
+export let Editor: EditorDidMountParams[0];
+export const scrollInfo: any = {};
 
 const EditorComponent = () => {
   const { context, setContext } = useAppContext();
-  const [value, setValue] =
-    useState<string>(`import React, { useState, ReactNode } from "react";
-  import { Space, Badge } from "antd";
-  import FileManager from "../FileManager/FileManager";
-  import Chat from "../Chat/Chat";
-  import NotificationPanel from "../NotificationPanel/NotificationPanel";
-  import ClosedNotificationPanel from "../ClosedNotificationPanel/ClosedNotificationPanel";
-  import {
-    FileOutlined,
-    WechatOutlined,
-    CameraOutlined,
-    SettingOutlined,
-    BellOutlined,
-    BookOutlined,
-  } from "@ant-design/icons";
-  import Style from "./ToolPanel.module.css";
-  
-  interface Props {
-    setToolPanelSize: (state: any) => any;
-  }
-  
-  interface Tool {
-    icon: ReactNode;
-    name: string;
-  }
-  
-  const tools = [
-    { icon: <FileOutlined />, name: "file" },
-    { icon: <WechatOutlined />, name: "chat" },
-    { icon: <CameraOutlined />, name: "camera" },
-    { icon: <SettingOutlined />, name: "settings" },
-  
-    {
-      icon: (
-        <Badge
-          className={Style.Badge}
-          count={10}
-          overflowCount={9}
-          size="small"
-          offset={[-5, 0]}
-          title={"Unread messages"}
-        >
-          <BellOutlined className={Style.ToolPanel_Icons} />
-        </Badge>
-      ),
-      name: "notice",
-    },
-    { icon: <BookOutlined />, name: "closed_notice" },
-  ];
-  
-  const TOOL_PANEL_WIDTH: number = 450;
-  
-  const ToolPanel = ({ setToolPanelSize }: Props) => {
-    const [isOpened, setIsOpened] = useState<boolean>(false);
-    const [openedTool, setOpenedTool] = useState<string>("");
-  
-    const toolsToComponents = (tools: Tool[]): ReactNode[] => {
-      return tools.map((item) => (
-        <div key={item.name} onClick={(e) => onIconClick(e, item.name)}>
-          {item.icon}
-        </div>
-      ));
-    };
-  
-    const openToolPanel = (id: string) => {
-      setOpenedTool(id);
-      setIsOpened(true);
-      setToolPanelSize({ width: TOOL_PANEL_WIDTH + "px", height: "100%" });
-    };
-  
-    const closeToolPanel = () => {
-      setToolPanelSize({ width: "50px", height: "100%" });
-      setIsOpened(false);
-    };
-  
-    const onIconClick = (e: any, id: string) => {
-      if (isOpened) {
-        if (openedTool != id) openToolPanel(id);
-        else closeToolPanel();
-      } else openToolPanel(id);
-    };
-  
-    const getToolComponentByName = (name: string): ReactNode => {
-      switch (name) {
-        case "file":
-          return <FileManager />;
-        case "chat":
-          return <Chat />;
-        case "notice":
-          return <NotificationPanel />;
-        case "closed_notice":
-          return <ClosedNotificationPanel />;
-      }
-    };
-  
-    return (
-      <div className={Style.Wrapper}>
-        <Space
-          className={"ClassName"}
-          style={{ width: 50 }}
-          direction="vertical"
-        >
-          {toolsToComponents(tools)}
-        </Space>
-        {isOpened && (
-          <div className={Style.ToolPanel_OpenedTool}>
-            {getToolComponentByName(openedTool)}
-          </div>
-        )}
-      </div>
-    );
-  };
-  
-  export default ToolPanel;
-  `);
-  const [isContextMenu, setContextMenu] = useState<boolean>(false);
+  const [value, setValue] = useState<string>("");
+  const EditorRef = useRef<EditorDidMountParams[0]>();
+  const MonacoRef = useRef<EditorDidMountParams[1]>();
 
-  const onBeforeChange = (editor: any, data: any, value: string): void => {
+  useEffect(() => {
+    if (Editor) {
+      let model = Editor.getModel();
+      let content =
+        typeof context.fileManagerOpenedFile.content === "object"
+          ? ""
+          : context.fileManagerOpenedFile.content;
+
+      if (model) {
+        Monaco.editor.setModelLanguage(
+          model,
+          getModeFromExt(context.fileManagerOpenedFile.ext)
+        );
+
+        setValue(content);
+      }
+    }
+  }, [context.fileManagerOpenedFile]);
+
+  function getModeFromExt(ext: string | undefined): string {
+    switch (ext) {
+      case "js":
+        return "javascript";
+      case "css":
+        return "text/css";
+      case "html":
+        return "text/html";
+      default:
+        return "";
+    }
+  }
+
+  const onChange = (value: any, ev: any): void => {
     setValue(value);
   };
 
-  const onChange = (editor: any, data: any, value: string): void => {};
+  const handleEditorDidMount = (
+    editor: EditorDidMountParams[0],
+    monaco: EditorDidMountParams[1]
+  ) => {
+    EditorRef.current = editor;
+    MonacoRef.current = monaco;
 
-  const onContexMenu = (cm: CodeMirror.Editor, e: any) => {
-    e.preventDefault();
-    editor = cm;
-    let pos = Editor.coordsChar({ left: e.clientX, top: e.clientY });
+    Monaco = monaco;
+    Editor = editor;
 
-    x = e.clientX;
-    y = e.clientY - 15;
+    Editor.onContextMenu((e) => {
+      const cursor = document.querySelector(
+        "textarea.monaco-mouse-cursor-text"
+      ) as HTMLElement;
+      const el = document.createElement("div");
+      const offsetY: number = 40 + 10 + 2;
+      const offsetX: number = 20;
 
-    if (
-      !(e.path[0] as HTMLElement).classList.contains("CodeMirror-selectedtext")
-    ) {
-      Doc.setCursor({ line: pos.line, ch: pos.ch});
-    }
+      if (cursor) {
+        el.style.position = "absolute";
+        el.style.width = "10px";
+        el.style.height = "10px";
+        el.style.backgroundColor = "#f00";
+        el.style.top = cursor.offsetTop + offsetX + "px";
+        el.style.left = cursor.offsetLeft + offsetY + "px";
+        el.style.zIndex = "999";
 
-    let cursorPosFrom = Doc.getCursor("from");
-    let cursorPosTo = Doc.getCursor("to");
-
-    setContext({
-      ...context,
-      noticePos: { line: cursorPosTo.line, ch: cursorPosTo.ch },
-      lineRange: {
-        from: cursorPosFrom.line,
-        to: cursorPosTo.line,
-      },
+        document.body.append(el);
+        console.dir(cursor);
+      }
     });
 
-    setContextMenu(true);
+    editor.addAction({
+      id: "addNotice",
+      label: "Add notice",
+      contextMenuGroupId: "2_modification",
+      contextMenuOrder: 0,
+      run: (editor: EditorDidMountParams[0]) => {
+        let sel = editor.getSelection();
+
+        if (sel !== null) {
+          setContext({
+            ...context,
+            noticePos: {
+              startColumn: sel.startColumn,
+              startLineNumber: sel.startLineNumber,
+              endColumn: sel.endColumn,
+              endLineNumber: sel.endLineNumber,
+            },
+            lineRange: {
+              from: sel.startLineNumber,
+              to: sel.endLineNumber,
+            },
+            isNoticeAddWindowOpened: true,
+          });
+        }
+      },
+    });
   };
-
-  // useEffect(() => {
-  //     document
-  //     .getElementsByClassName("CodeMirror-overlayscroll-vertical")[0]
-  //     .children[0].addEventListener("mousedown", (event) => {
-  //       const el: any = event.target;
-
-  //       const oldHeight = el.offsetHeight ;
-
-  //       const onMouseMove = (e: any) => {
-  //         console.log(e.target.style.height);
-
-  //         e.target.style.height = oldHeight  + 12 + "px";
-  //       };
-
-  //       el?.addEventListener("mousemove", onMouseMove);
-
-  //       el?.addEventListener("mouseup", () =>
-  //         el.removeEventListener("mousemove", onMouseMove)
-  //       );
-  //     });
-  // }, []);
 
   return (
     <>
-      <Controlled
+      <MonacoEditor
         className={"CodeMirror_custom"}
+        defaultLanguage="javascript"
+        defaultValue=""
+        theme="vs-dark"
         value={value}
-        options={Options}
-        onBeforeChange={onBeforeChange}
         onChange={onChange}
-        onContextMenu={onContexMenu}
-        editorDidMount={(editor) => {
-          Editor = editor;
-          Doc = Editor.getDoc();
-        }}
-      ></Controlled>
-      {isContextMenu && (
-        <EditorContextMenu
-          setContextMenu={setContextMenu}
-          pos={{ x, y }}
-          cm={editor}
-        />
-      )}
+        onMount={handleEditorDidMount}
+      />
     </>
   );
 };

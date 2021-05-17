@@ -3,6 +3,7 @@ import { Popover, Space } from "antd";
 import { Typography } from "antd";
 import { CloseCircleOutlined } from "@ant-design/icons";
 import { NoticeItem } from "../ToolPanel/ToolPanel";
+import { useAppContext } from "../App/AppContext";
 
 const { Text } = Typography;
 
@@ -21,6 +22,8 @@ const EditorNotice: FC<Props> = ({
   setIsOpened,
   element,
 }: Props) => {
+  const { context, setContext } = useAppContext();
+
   return (
     <Popover
       placement={"topLeft"}
@@ -29,7 +32,7 @@ const EditorNotice: FC<Props> = ({
       destroyTooltipOnHide
       content={
         <>
-          <div>
+          <div className={"CoolMan"}>
             <Text type="secondary" strong style={{ fontSize: "0.8em" }}>
               from {data.author}
             </Text>
@@ -46,6 +49,7 @@ const EditorNotice: FC<Props> = ({
             <a
               onClick={() => {
                 setIsOpened(false);
+                setContext({ ...context, isSrcollEventActive: false });
                 element.remove();
               }}
             >

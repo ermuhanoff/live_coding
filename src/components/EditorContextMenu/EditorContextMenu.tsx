@@ -2,7 +2,7 @@ import React from "react";
 import ContextMenuPoint from "../ContextMenu/ContextMenuPoint";
 import ContextMenu from "../ContextMenu/ContextMenu";
 import { useAppContext } from "../App/AppContext";
-import { Doc, Editor } from "../Editor/Editor";
+import { Monaco, Editor } from "../Editor/Editor";
 
 interface Props {
   setContextMenu: (visible: boolean) => void;
@@ -17,14 +17,14 @@ const EditorContextMenu = ({ setContextMenu, pos, cm }: Props) => {
   const { context, setContext } = useAppContext();
 
   const onCopy = (e: any) => {
-    let selected: string = Doc.getSelection();
-    if (selected === "") {
-      navigator.clipboard.writeText(Doc.getLine(Doc.getCursor().line));
-    } else {
-      navigator.clipboard.writeText(selected);
-    }
+    // let selected: string = Doc.getSelection();
+    // if (selected === "") {
+    //   navigator.clipboard.writeText(Doc.getLine(Doc.getCursor().line));
+    // } else {
+    //   navigator.clipboard.writeText(selected);
+    // }
 
-    setContextMenu(false);
+    // setContextMenu(false);
   };
 
   const data = [
