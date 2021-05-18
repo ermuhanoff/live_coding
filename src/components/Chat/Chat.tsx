@@ -3,35 +3,57 @@ import ChatMessage from "../ChatMessage/ChatMessage";
 import Style from "./Chat.module.css";
 import { Input, Button } from "antd";
 import Draggable from "react-draggable";
+import { Message } from "../ToolPanel/ToolPanel";
+import * as Scroll from "react-scroll";
+
 const { TextArea } = Input;
 
-const messages = [
-  <ChatMessage content={"content aaaaaaaaaaaa"} title={"Voloday"} />,
-  <ChatMessage content={"content aaaaaaaaaaaa"} title={"Voloday"} />,
-  <ChatMessage content={"content aaaa aaaaaaaa"} title={"Voloday"} />,
-];
+interface Props {
+  messages: Message[];
+  setMessageArr: (value: Message[]) => void;
+  setMessageCount: (value: number) => void;
+}
 
-const Chat = () => {
-  const [messagesList, setMessagesList] = useState<ReactNode[]>(messages);
+const Chat = ({ messages, setMessageArr, setMessageCount }: Props) => {
   const [inputText, setInputText] = useState<string>("");
+
+  const messgeToReactNode = (messages: Message[]) => {
+    return messages.map((item) => (
+      <ChatMessage content={item.content} title={item.title} />
+    ));
+  };
+
+  useEffect(() => {
+    Scroll.scroller.scrollTo("scrollPoint", {
+      duration: 500,
+      delay: 0,
+      smooth: true,
+      containerId: "scroll",
+    });
+  }, []);
 
   const onClick = (e: any) => {
     e.preventDefault();
 
     if (inputText !== "") {
-      setMessagesList((prevState) => {
-        const newState = [...prevState];
-        newState.push(<ChatMessage content={inputText} title={"Voloday"} />);
-
-        return newState;
-      });
+      setMessageArr([...messages, { content: inputText, title: "Server" }]);
+      setMessageCount(messages.length + 1);
       setInputText("");
+      Scroll.scroller.scrollTo("scrollPoint", {
+        duration: 500,
+        delay: 0,
+        smooth: true,
+        containerId: "scroll",
+      });
     }
   };
 
   return (
     <div className={Style.Chat}>
-      <div className={Style.Messages}>{messagesList}</div>
+      <div className={Style.Messages} id="scroll">
+        {messgeToReactNode(messages)}
+        {<Scroll.Element name="scrollPoint" />}
+      </div>
       <div className={Style.Input}>
         <TextArea
           showCount
@@ -48,23 +70,6 @@ const Chat = () => {
           Send Message
         </Button>
       </div>
-      {/* <div>
-        <Draggable
-        //   axis="x"
-          handle=".handle"
-          defaultPosition={{ x: 0, y: 0 }}
-          grid={[25, 25]}
-          scale={1}
-        //   onStart={this.handleStart}
-        //   onDrag={this.handleDrag}
-        //   onStop={this.handleStop}
-        >
-          <div>
-            <div className="handle">Drag from here</div>
-            <div>This readme is really dragging on...</div>
-          </div>
-        </Draggable>
-      </div> */}
     </div>
   );
 };

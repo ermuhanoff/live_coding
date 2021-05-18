@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Drawer, Form, Input, Space } from "antd";
-import { useAppContext } from "../App/AppContext";
+import { Context, useAppContext } from "../App/AppContext";
 import NoticeEditor from "../NoticeEditor/NoticeEditor";
 import Text from "antd/lib/typography/Text";
 import { Editor, Monaco } from "../Editor/Editor";
+import { Emitter } from "../App/App";
 
 interface Props {
   createNotice: (values: any) => void;
@@ -24,12 +25,22 @@ const editorLayout = {
 
 const NoticeAddComponent = ({ createNotice }: Props) => {
   const { context, setContext } = useAppContext();
+  const [isOpened, setIsOpened] = useState<boolean>(false);
+
+  useEffect(() => {
+    Emitter.on("open_notice_add", () => {
+      setIsOpened(Context.isNoticeAddWindowOpened);
+    });
+    setIsOpened(Context.isNoticeAddWindowOpened);
+  });
 
   const [form] = Form.useForm();
 
   const onFinish = (values: any) => {
+    // console.log(context.fileManagerOpenedFile);
+    setIsOpened(false);
+    Context.isNoticeAddWindowOpened = false;
     createNotice(values);
-    setContext((prev) => ({ ...prev, isNoticeAddWindowOpened: false }));
   };
 
   const onReset = () => {
@@ -37,12 +48,16 @@ const NoticeAddComponent = ({ createNotice }: Props) => {
   };
 
   const getValueOfSelection = (): string => {
-    if (Editor === undefined || !context.isNoticeAddWindowOpened) return "";
+    if (Editor === undefined || !isOpened) return "";
     let selectedLinesText: string = "";
 
-    for (let i = context.lineRange.from; i < context.lineRange.to + 1; i++) {
+    for (
+      let i = Context.noticePos.startLineNumber;
+      i < Context.noticePos.endLineNumber + 1;
+      i++
+    ) {
       selectedLinesText += Editor.getModel()?.getLineContent(i);
-      if (i != context.lineRange.to) {
+      if (i != Context.noticePos.endLineNumber) {
         selectedLinesText += "\n";
       }
     }
@@ -58,9 +73,11 @@ const NoticeAddComponent = ({ createNotice }: Props) => {
       closable
       destroyOnClose
       onClose={() => {
-        setContext((prev) => ({ ...prev, isNoticeAddWindowOpened: false }));
+        Context.isNoticeAddWindowOpened = false;
+        setIsOpened(false);
+        Emitter.emit("close_notice_add");
       }}
-      visible={context.isNoticeAddWindowOpened}
+      visible={isOpened}
       footer={
         <div
           style={{
@@ -69,10 +86,9 @@ const NoticeAddComponent = ({ createNotice }: Props) => {
         >
           <Button
             onClick={() => {
-              setContext((prev) => ({
-                ...prev,
-                isNoticeAddWindowOpened: false,
-              }));
+              Context.isNoticeAddWindowOpened = false;
+              setIsOpened(false);
+              Emitter.emit("close_notice_add");
             }}
             style={{ marginRight: 8 }}
           >
@@ -116,10 +132,14 @@ const NoticeAddComponent = ({ createNotice }: Props) => {
             Lines selected:
           </Text>
         </Form.Item>
-        <Form.Item {...editorLayout}>
+        <Form.Item {...editorLayout} style={{ minHeight: 300 }}>
           <NoticeEditor
             value={getValueOfSelection()}
-            lineStart={context.lineRange.from}
+            lineStart={Context.noticePos.startLineNumber}
+            lineCount={
+              Context.noticePos.endLineNumber -
+              Context.noticePos.startLineNumber
+            }
           />
         </Form.Item>
       </Form>

@@ -14,6 +14,7 @@ interface Props {
   placement?: TooltipPlacement;
   trigger?: string;
   visible?: boolean;
+  fileItem: any;
   onVisibleChange?: (visible: boolean) => void;
 }
 
@@ -25,42 +26,42 @@ const ContextMenu: FC<Props> = ({
   visible = false,
   data,
   action,
+  fileItem,
   onVisibleChange,
 }: Props) => {
-  const toListItems = (data: any[]): ReactNode[] => {
-    return data.map((item, index) => {
-      return (
-        <div
-          key={index}
-          onClick={(e) => {
-            if (!item.disabled) action[index](e);
-          }}
-        >
-          {<Text disabled={item.disabled}>{item.el}</Text>}
-        </div>
-      );
-    });
-  };
-
   return (
-    <Popover
-      placement={placement}
-      defaultVisible={visible}
-      onVisibleChange={onVisibleChange}
-      content={
-        <List
-          size="small"
-          dataSource={toListItems(data)}
-          renderItem={(item: ReactNode) => {
-            return <List.Item className={Style.List_item}>{item}</List.Item>;
-          }}
-        />
-      }
-      title={title}
-      trigger={trigger}
-    >
-      {children}
-    </Popover>
+      <Popover
+        placement={placement}
+        defaultVisible={visible}
+        onVisibleChange={onVisibleChange}
+        content={
+          <List
+            size="small"
+            dataSource={data}
+            renderItem={(item: any) => {
+              return (
+                <List.Item
+                  className={Style.List_item}
+                  style={!item.last ? { border: "none" } : {}}
+                >
+                  <div
+                    key={item.id}
+                    onClick={(e) => {
+                      if (!item.disabled) action[item.id](e, fileItem);
+                    }}
+                  >
+                    {<Text disabled={item.disabled}>{item.el}</Text>}
+                  </div>
+                </List.Item>
+              );
+            }}
+          />
+        }
+        title={title}
+        trigger={trigger}
+      >
+        {children}
+      </Popover>
   );
 };
 

@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import MonacoEditor, { OnMount } from "@monaco-editor/react";
-import { useAppContext } from "../App/AppContext";
+import { Context, useAppContext } from "../App/AppContext";
+import {} from "../FileManager/FileManager";
+import { Emitter } from "../App/App";
+import { FileInfo } from "../ToolPanel/ToolPanel";
 
 type EditorDidMountParams = Parameters<OnMount>;
 
@@ -15,23 +18,26 @@ const EditorComponent = () => {
   const MonacoRef = useRef<EditorDidMountParams[1]>();
 
   useEffect(() => {
+    setEditorData(Context.fileManagerOpenedFile);
+    Emitter.on("open_file", (file: FileInfo) => {
+      setEditorData(file);
+    });
+  }, []);
+
+  function setEditorData(file: FileInfo): void {
     if (Editor) {
       let model = Editor.getModel();
-      let content =
-        typeof context.fileManagerOpenedFile.content === "object"
-          ? ""
-          : context.fileManagerOpenedFile.content;
 
       if (model) {
-        Monaco.editor.setModelLanguage(
-          model,
-          getModeFromExt(context.fileManagerOpenedFile.ext)
-        );
-
-        setValue(content);
+        Monaco.editor.setModelLanguage(model, getModeFromExt(file.ext));
+        setValue(getFileContent(file));
       }
     }
-  }, [context.fileManagerOpenedFile]);
+  }
+
+  function getFileContent(file: FileInfo): string {
+    return typeof file.content === "object" ? "" : file.content;
+  }
 
   function getModeFromExt(ext: string | undefined): string {
     switch (ext) {
@@ -60,28 +66,6 @@ const EditorComponent = () => {
     Monaco = monaco;
     Editor = editor;
 
-    Editor.onContextMenu((e) => {
-      const cursor = document.querySelector(
-        "textarea.monaco-mouse-cursor-text"
-      ) as HTMLElement;
-      const el = document.createElement("div");
-      const offsetY: number = 40 + 10 + 2;
-      const offsetX: number = 20;
-
-      if (cursor) {
-        el.style.position = "absolute";
-        el.style.width = "10px";
-        el.style.height = "10px";
-        el.style.backgroundColor = "#f00";
-        el.style.top = cursor.offsetTop + offsetX + "px";
-        el.style.left = cursor.offsetLeft + offsetY + "px";
-        el.style.zIndex = "999";
-
-        document.body.append(el);
-        console.dir(cursor);
-      }
-    });
-
     editor.addAction({
       id: "addNotice",
       label: "Add notice",
@@ -91,22 +75,35 @@ const EditorComponent = () => {
         let sel = editor.getSelection();
 
         if (sel !== null) {
-          setContext({
-            ...context,
-            noticePos: {
-              startColumn: sel.startColumn,
-              startLineNumber: sel.startLineNumber,
-              endColumn: sel.endColumn,
-              endLineNumber: sel.endLineNumber,
-            },
-            lineRange: {
-              from: sel.startLineNumber,
-              to: sel.endLineNumber,
-            },
-            isNoticeAddWindowOpened: true,
-          });
+          Context.noticePos = sel;
+          Context.isNoticeAddWindowOpened = true;
+
+          Emitter.emit("open_notice_add");
         }
       },
+    });
+
+    editor.updateOptions({
+      roundedSelection: true,
+      scrollBeyondLastLine: false,
+      smoothScrolling: true
+    });
+
+    monaco.editor.defineTheme("vs-dark-custom", {
+      base: "vs-dark",
+      inherit: true,
+      rules: [],
+      colors: {
+        "editor.selectionBackground": "#e6e6e625",
+        "editor.inactiveSelectionBackground": "#e6e6e615",
+      },
+    });
+    monaco.editor.setTheme("vs-dark-custom");
+
+    editor.onDidScrollChange((e) => {
+      if (Context.isSrcollEventActive) {
+        Emitter.emit("notice_will_scroll", e);
+      }
     });
   };
 

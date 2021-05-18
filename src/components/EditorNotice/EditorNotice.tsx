@@ -1,9 +1,12 @@
-import React, { ReactNode, FC, ReactPortal } from "react";
+import React, { ReactNode, FC, ReactPortal, useEffect, useState } from "react";
 import { Popover, Space } from "antd";
 import { Typography } from "antd";
 import { CloseCircleOutlined } from "@ant-design/icons";
 import { NoticeItem } from "../ToolPanel/ToolPanel";
-import { useAppContext } from "../App/AppContext";
+import { Context } from "../App/AppContext";
+import { Editor } from "../Editor/Editor";
+import { TooltipPlacement } from "antd/lib/tooltip";
+import { Emitter } from "../App/App";
 
 const { Text } = Typography;
 
@@ -12,7 +15,8 @@ interface Props {
   data: NoticeItem;
   isOpened: boolean;
   setIsOpened: (val: boolean) => void;
-  element: HTMLElement;
+  contentWidget: any;
+  placement: TooltipPlacement
 }
 
 const EditorNotice: FC<Props> = ({
@@ -20,14 +24,13 @@ const EditorNotice: FC<Props> = ({
   data,
   isOpened,
   setIsOpened,
-  element,
+  contentWidget,
+  placement
 }: Props) => {
-  const { context, setContext } = useAppContext();
-
+  
   return (
     <Popover
-      placement={"topLeft"}
-      defaultVisible={true}
+      placement={placement}
       visible={isOpened}
       destroyTooltipOnHide
       content={
@@ -49,8 +52,12 @@ const EditorNotice: FC<Props> = ({
             <a
               onClick={() => {
                 setIsOpened(false);
-                setContext({ ...context, isSrcollEventActive: false });
-                element.remove();
+                Context.isSrcollEventActive = false;
+                Context.decorations = Editor.deltaDecorations(
+                  Context.decorations,
+                  []
+                );
+                if (contentWidget) Editor.removeContentWidget(contentWidget);
               }}
             >
               <CloseCircleOutlined />

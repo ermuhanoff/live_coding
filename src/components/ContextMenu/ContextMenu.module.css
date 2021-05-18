@@ -1,9 +1,11 @@
 .List_item {
   cursor: pointer;
+  border-bottom: none;
 }
 
 .List_item:hover {
   color: #1890ff;
+  
 }
 
 .ContextMenuPoint {

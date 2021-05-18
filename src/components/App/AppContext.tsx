@@ -1,3 +1,4 @@
+import { TooltipPlacement } from "antd/lib/tooltip";
 import { Position } from "codemirror";
 import { createContext, useContext, useState } from "react";
 import { FileInfo } from "../ToolPanel/ToolPanel";
@@ -24,6 +25,8 @@ export const Context = {
   },
   isSrcollEventActive: false,
   fileManagerOpenedFile: { content: "" } as FileInfo,
+  decorations: [] as string[],
+  placement: "topLeft" as TooltipPlacement
 };
 
 export type AppContextType = typeof Context;
