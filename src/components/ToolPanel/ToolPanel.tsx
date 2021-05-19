@@ -22,7 +22,7 @@ import { Size } from "../WorkSpace/WorkSpace";
 import MonacoRef from "monaco-editor";
 import { Emitter } from "../App/App";
 import { TooltipPlacement } from "antd/lib/tooltip";
-
+import axios from "axios";
 
 interface Props {
   setToolPanelSize: (state: any) => any;
@@ -45,10 +45,11 @@ export interface Message {
 export interface FileInfo {
   name: string;
   path: string;
-  type: "folder" | "file";
-  ext?: string;
+  isDirectory: boolean;
+  ext: string;
   size: number;
-  content: FileInfo[] | string;
+  content: string;
+  children: FileInfo[];
 }
 
 interface Tool {
@@ -143,100 +144,15 @@ const data: NoticeItem[] = [
     desc: "Очень странное поведение тут. Возможно из-за пееременной... Или возможно, контекст не тот.\nПопробуй проверь",
     author: "Oleg",
     position: {
-      startLineNumber: 23,
-      endLineNumber: 26,
-      startColumn: 12,
-      endColumn: 13,
+      startLineNumber: 45,
+      endLineNumber: 45,
+      startColumn: 2,
+      endColumn: 2,
     },
     currentFile: "/script/index.js",
   },
 ];
-const directory: FileInfo[] = [
-  {
-    name: "script",
-    path: "/script",
-    type: "folder",
-    size: 0,
-    content: [
-      {
-        name: "index.js",
-        path: "/script/index.js",
-        type: "file",
-        ext: "js",
-        size: 0,
-        content: `import React from "react";
-import { Card, Avatar } from "antd";
-import {
-  UserOutlined,
-  CodeOutlined,
-  CloseCircleOutlined,
-} from "@ant-design/icons";
-import { NoticeItem } from "../ToolPanel/ToolPanel";
-
-const { Meta } = Card;
-
-interface Props {
-  data: NoticeItem;
-  closeNotice: (id: number) => void;
-  openNotice: (id: number) => void;
-}
-
-const Notice = ({ data, closeNotice, openNotice }: Props) => {
-  const onCodeClick = () => {
-    // Doc.setCursor(70, 11);
-    openNotice(data.id);
-  };
-  const onCloseClick = () => {
-    closeNotice(data.id);
-  };
-  return (
-    <>
-      <Card
-        size="small"
-        actions={[
-          <CodeOutlined key="code" onClick={onCodeClick} />,
-          <CloseCircleOutlined key="close" onClick={onCloseClick} />,
-        ]}
-      >
-        <Meta
-          avatar={<Avatar icon={<UserOutlined />} />}
-          title={data.title}
-          description={data.desc}
-        />
-      </Card>
-    </>
-  );
-};
-
-export default Notice;`,
-      },
-    ],
-  },
-  {
-    name: "style",
-    path: "/style",
-    type: "folder",
-    size: 0,
-    content: [
-      {
-        name: "style.css",
-        path: "/style/style.css",
-        type: "file",
-        ext: "css",
-        size: 0,
-        content: "body {\n\tmargin: 0;\n\tpadding: 0\n}\n",
-      },
-    ],
-  },
-  {
-    name: "index.html",
-    path: "/index.html",
-    type: "file",
-    ext: "html",
-    size: 0,
-    content: `<!DOCTYPE html>\n<html lang="en">\n\t<head>\n\t</head>\n\t<body>\n\t</body>\n</html>`,
-  },
-];
+const directory: FileInfo[] = [];
 const messages: Message[] = [
   { content: "content aaaaaaaaaaaa", title: "Voloday" },
   { content: "content aaaaaaaaaaaa", title: "Voloday" },
@@ -263,6 +179,7 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
   const [size, setSize] = useState<Size>({ width: "0px", height: "100%" });
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [placement, setPlacement] = useState<TooltipPlacement>("topLeft");
+  const [filesArr, setFilesArr] = useState<FileInfo[]>(directory);
 
   let contentWidget;
 
@@ -273,18 +190,35 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
       const popover = document.getElementsByClassName("CoolMan")[0];
       const wOffset = noticePoint.offsetTop;
       const sOffset = e.scrollTop;
-      const offset = wOffset - sOffset + 10;
+      const offset = wOffset - sOffset;
 
       if (popover) {
-        const parent: any = popover.closest(".ant-popover ");
+        const parent: HTMLElement | null = popover.closest(".ant-popover ");
 
-        if (wOffset > parent.offsetHeight) {
-          parent.style.top = offset - parent.offsetHeight + "px";
+        if (!parent) return;
+
+        if (parent?.classList.contains("ant-popover-placement-bottomLeft")) {
+          parent.style.top = offset + 17 + "px";
         } else {
-          parent.style.top = offset + "px";
+          parent.style.top = offset - parent.offsetHeight - 2 + "px";
         }
       }
     });
+
+    axios
+      .get("http://localhost:4000/directory")
+      .then((json) => {
+        console.log(json.data);
+
+        json.data.sort((a: FileInfo, b: FileInfo) => {
+          if (a.isDirectory) return -1;
+          else if (b.isDirectory) return 0;
+          return 1;
+        });
+
+        setFilesArr(json.data);
+      })
+      .catch((error) => console.log(error));
   }, []);
 
   const tools: Tool[] = [
@@ -343,7 +277,7 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
     let scrollTop = Editor.getScrollTop();
     let place: number;
 
-    if (scrollTop < 200 || notice.position.startLineNumber < 10) {
+    if (notice.position.startLineNumber < 10) {
       place = notice.position.endLineNumber;
       Context.placement = "bottomLeft";
     } else {
@@ -449,7 +383,7 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
       case "file":
         return (
           <FileManager
-            data={directory}
+            data={filesArr}
             expanded={expandedKeys}
             setExpanded={setExpandedKeys}
           />

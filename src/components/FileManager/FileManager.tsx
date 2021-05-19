@@ -91,8 +91,8 @@ const FileManager = ({ data, setExpanded, expanded }: Props) => {
     let flatted: FileInfo[] = [];
 
     data.forEach((item) => {
-      if (typeof item.content === "object") {
-        flatted = flatted.concat(flatDataArray(item.content));
+      if (item.isDirectory) {
+        flatted = flatted.concat(flatDataArray(item.children));
       } else {
         flatted.push(item);
       }
@@ -114,23 +114,25 @@ const FileManager = ({ data, setExpanded, expanded }: Props) => {
     setExpanded(stringKeys);
   };
 
-  const getIconFromExt = (
-    ext: string
+  const getIconFromExtAndType = (
+    ext: string,
+    isDirectory: boolean
   ): ReactNode | ((item: any) => ReactNode) => {
+    if (isDirectory) {
+      return (item) => {
+        if (item.expanded) return <FolderOpenOutlined />;
+        return <FolderOutlined />;
+      };
+    }
     switch (ext) {
-      case "html":
+      case ".html":
         return <DiHtml5 />;
-      case "css":
+      case ".css":
         return <DiCss3 />;
-      case "js":
+      case ".js":
         return <DiJavascript1 />;
-      case "txt":
+      case ".txt":
         return <GrDocumentTxt />;
-      case "":
-        return (item) => {
-          if (item.expanded) return <FolderOpenOutlined />;
-          return <FolderOutlined />;
-        };
       default:
         return <FileOutlined />;
     }
@@ -142,13 +144,13 @@ const FileManager = ({ data, setExpanded, expanded }: Props) => {
     data.forEach((item) => {
       let ext = item.ext || "";
       let data: TreeData = new TreeDataItem({
-        title: item.name,
+        title: item.name + ext,
         key: item.path,
-        isLeaf: item.type === "file",
-        icon: getIconFromExt(ext),
+        isLeaf: !item.isDirectory,
+        icon: getIconFromExtAndType(ext, item.isDirectory),
       });
-      if (typeof item.content === "object") {
-        data.children = getTreeDataFromData(item.content);
+      if (item.isDirectory) {
+        data.children = getTreeDataFromData(item.children);
       }
       treeData.push(data);
     });

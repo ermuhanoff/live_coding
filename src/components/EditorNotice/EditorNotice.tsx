@@ -16,7 +16,7 @@ interface Props {
   isOpened: boolean;
   setIsOpened: (val: boolean) => void;
   contentWidget: any;
-  placement: TooltipPlacement
+  placement: TooltipPlacement;
 }
 
 const EditorNotice: FC<Props> = ({
@@ -25,9 +25,8 @@ const EditorNotice: FC<Props> = ({
   isOpened,
   setIsOpened,
   contentWidget,
-  placement
+  placement,
 }: Props) => {
-  
   return (
     <Popover
       placement={placement}
@@ -40,7 +39,7 @@ const EditorNotice: FC<Props> = ({
               from {data.author}
             </Text>
           </div>
-          <div style={{ padding: "5px 0px", fontSize: "1.2em" }}>
+          <div style={{ padding: "5px 0px", fontSize: "1.2em", maxWidth: 400 }}>
             {data.desc}
           </div>
         </>

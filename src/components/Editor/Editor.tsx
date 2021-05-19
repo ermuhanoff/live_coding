@@ -4,6 +4,7 @@ import { Context, useAppContext } from "../App/AppContext";
 import {} from "../FileManager/FileManager";
 import { Emitter } from "../App/App";
 import { FileInfo } from "../ToolPanel/ToolPanel";
+import axios from "axios";
 
 type EditorDidMountParams = Parameters<OnMount>;
 
@@ -41,11 +42,11 @@ const EditorComponent = () => {
 
   function getModeFromExt(ext: string | undefined): string {
     switch (ext) {
-      case "js":
+      case ".js":
         return "javascript";
-      case "css":
+      case ".css":
         return "text/css";
-      case "html":
+      case ".html":
         return "text/html";
       default:
         return "";
@@ -68,7 +69,7 @@ const EditorComponent = () => {
 
     editor.addAction({
       id: "addNotice",
-      label: "Add notice",
+      label: "Add Notice",
       contextMenuGroupId: "2_modification",
       contextMenuOrder: 0,
       run: (editor: EditorDidMountParams[0]) => {
@@ -83,10 +84,24 @@ const EditorComponent = () => {
       },
     });
 
+    editor.addAction({
+      id: "saveAaction",
+      label: "Save Current File",
+      contextMenuGroupId: "9_cutcopypaste",
+      contextMenuOrder: 0,
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S],
+      run: (editor: EditorDidMountParams[0]) => {
+        axios.post("http://localhost:4000/savefile", {
+          filePath: Context.fileManagerOpenedFile.path,
+          content: editor.getValue(),
+        });
+      },
+    });
+
     editor.updateOptions({
       roundedSelection: true,
       scrollBeyondLastLine: false,
-      smoothScrolling: true
+      smoothScrolling: true,
     });
 
     monaco.editor.defineTheme("vs-dark-custom", {
