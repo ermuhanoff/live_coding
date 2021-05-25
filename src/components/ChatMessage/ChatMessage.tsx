@@ -6,16 +6,17 @@ import Style from "./ChatMessage.module.css";
 interface Props {
   title: string;
   content: string;
+  date: string
 }
 
-const ChatMessage = ({ title, content }: Props) => {
+const ChatMessage = ({ title, content, date }: Props) => {
   return (
     <div className={Style.ChatMessage}>
       <Comment
         author={title}
         avatar={<Avatar icon={<UserOutlined />} />}
         content={<p>{content}</p>}
-        datetime={<div className={Style.ChatMessage_Date}>{new Date().toLocaleTimeString()}</div>}
+        datetime={<div className={Style.ChatMessage_Date}>{date}</div>}
       />
     </div>
   );

@@ -6,6 +6,9 @@
   display: flex;
   align-items: center;
   width: 40px;
+  box-shadow: -15px 0px 15px 15px rgba(0, 0, 0, 0.158);
+  z-index: 3;
+  height: 100%;
 }
 
 .Wrapper {
@@ -17,7 +20,6 @@
 }
 
 .ToolPanel_OpenedTool {
-
   transition: all 0.02s ease-in;
 }
 

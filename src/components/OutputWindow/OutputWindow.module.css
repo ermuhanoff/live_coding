@@ -1,0 +1,48 @@
+.ConsoleItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0px;
+  border-bottom: 1px solid rgba(214, 214, 214, 0.521);
+}
+
+.Console {
+    display: flex;
+    flex-direction: column;
+}
+
+.ConsoleOutput {
+  height: 100%;
+  overflow: overlay;
+  padding: 5px 10px;
+  background-color: #fff;
+}
+
+.ConsoleMenu {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #1E1E1E;
+    color: rgba(190, 190, 190, 0.623);
+}
+
+.ConsoleMenuButtons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.ConsoleMenuButtons * {
+    margin: 0px 5px;
+}
+
+.Button:hover {
+    color: rgb(255, 255, 255);
+    cursor: pointer;
+}
+
+.FileAndLine {
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 10px;
+}

@@ -2,9 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 import MonacoEditor, { OnMount } from "@monaco-editor/react";
 import { Context, useAppContext } from "../App/AppContext";
 import {} from "../FileManager/FileManager";
-import { Emitter } from "../App/App";
+import { Emitter, socketRef, VIEW_TYPE } from "../App/App";
 import { FileInfo } from "../ToolPanel/ToolPanel";
 import axios from "axios";
+import { openNotification } from "../Notification/Notification";
 
 type EditorDidMountParams = Parameters<OnMount>;
 
@@ -22,6 +23,9 @@ const EditorComponent = () => {
     setEditorData(Context.fileManagerOpenedFile);
     Emitter.on("open_file", (file: FileInfo) => {
       setEditorData(file);
+    });
+    Emitter.on("editor_update", (data) => {
+      setValue(data.value);
     });
   }, []);
 
@@ -55,6 +59,10 @@ const EditorComponent = () => {
 
   const onChange = (value: any, ev: any): void => {
     setValue(value);
+    socketRef.current?.emit("editor_data", {
+      value,
+      file: Context.fileManagerOpenedFile.path,
+    });
   };
 
   const handleEditorDidMount = (
@@ -91,10 +99,29 @@ const EditorComponent = () => {
       contextMenuOrder: 0,
       keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S],
       run: (editor: EditorDidMountParams[0]) => {
-        axios.post("http://localhost:4000/savefile", {
-          filePath: Context.fileManagerOpenedFile.path,
-          content: editor.getValue(),
-        });
+        if (VIEW_TYPE === "streamer") {
+          axios
+            .post("http://localhost:4000/savefile", {
+              filePath: Context.fileManagerOpenedFile.path,
+              content: editor.getValue(),
+            })
+            .then(() => {
+              // openNotification({
+              //   message: "File saved!",
+              //   description: "File saved at " + new Date().toLocaleString(),
+              //   type: "success",
+              // });
+
+              Emitter.emit("output_reload");
+            })
+            .catch(() => {
+              openNotification({
+                message: "Save file error!",
+                description: "Unexpected error saving file!",
+                type: "error",
+              });
+            });
+        }
       },
     });
 
@@ -102,6 +129,7 @@ const EditorComponent = () => {
       roundedSelection: true,
       scrollBeyondLastLine: false,
       smoothScrolling: true,
+      readOnly: VIEW_TYPE == "streamer" ? false : true,
     });
 
     monaco.editor.defineTheme("vs-dark-custom", {

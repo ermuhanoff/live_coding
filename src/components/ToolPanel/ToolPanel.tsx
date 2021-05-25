@@ -1,6 +1,6 @@
 import React, { useState, ReactNode, useEffect } from "react";
 import ReactDOM from "react-dom";
-import { Space, Badge, Drawer, Button } from "antd";
+import { Space, Badge, Drawer, Button, Typography } from "antd";
 import FileManager from "../FileManager/FileManager";
 import Chat from "../Chat/Chat";
 import NotificationPanel from "../NotificationPanel/NotificationPanel";
@@ -20,9 +20,10 @@ import { Context, useAppContext } from "../App/AppContext";
 import NoticeAddComponent from "../NoticeAddComponent/NoticeAddComponent";
 import { Size } from "../WorkSpace/WorkSpace";
 import MonacoRef from "monaco-editor";
-import { Emitter } from "../App/App";
+import { Emitter, socketRef, VIEW_TYPE } from "../App/App";
 import { TooltipPlacement } from "antd/lib/tooltip";
 import axios from "axios";
+import { openNotification } from "../Notification/Notification";
 
 interface Props {
   setToolPanelSize: (state: any) => any;
@@ -40,6 +41,7 @@ export interface NoticeItem {
 export interface Message {
   content: string;
   title: string;
+  date: string;
 }
 
 export interface FileInfo {
@@ -57,6 +59,7 @@ interface Tool {
   name: string;
 }
 
+const { Text } = Typography;
 const closedData: NoticeItem[] = [
   {
     id: 6,
@@ -69,7 +72,8 @@ const closedData: NoticeItem[] = [
       startColumn: 4,
       endColumn: 6,
     },
-    currentFile: "/script/index.js",
+    currentFile:
+      "C:\\Users\\ermuh\\Documents\\js_projects\\live_coding_server\\root\\scripts\\index.js",
   },
   {
     id: 7,
@@ -114,7 +118,7 @@ const data: NoticeItem[] = [
   },
   {
     id: 2,
-    title: "А это работает при везде так?",
+    title: "А это работает везде так?",
     desc: "А если заначения будут другими или контест поменяется?\nВожможно ли падение ошибки?",
     author: "Danya",
     position: {
@@ -152,13 +156,13 @@ const data: NoticeItem[] = [
     currentFile: "/script/index.js",
   },
 ];
-const directory: FileInfo[] = [];
-const messages: Message[] = [
-  { content: "content aaaaaaaaaaaa", title: "Voloday" },
-  { content: "content aaaaaaaaaaaa", title: "Voloday" },
-  { content: "content aaaaaaaaaaaa", title: "Voloday" },
-  { content: "content aaaaaaaaaaaa", title: "Voloday" },
-];
+
+let messages: Message[] = [];
+let directory: FileInfo[] = [];
+let openedToolVar: string = "";
+let isOpenedToolVar: boolean = false;
+let newMessages: number = 0;
+let updateNum = 0;
 
 const TOOL_PANEL_WIDTH: number = 250;
 const noticePoint = document.createElement("div");
@@ -170,7 +174,7 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
   const [isNoticeOpened, setIsNoticeOpened] = useState<boolean>(false);
   const [openedTool, setOpenedTool] = useState<string>("");
   const [noticeCount, setNoticeCount] = useState<number>(data.length);
-  const [messageCount, setMesssageCount] = useState<number>(messages.length);
+  const [messageCount, setMesssageCount] = useState<number>(newMessages);
   const [messageArr, setMessageArr] = useState<Message[]>(messages);
   const [closedNoticeArr, setClosedNoticeArr] =
     useState<NoticeItem[]>(closedData);
@@ -180,6 +184,11 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [placement, setPlacement] = useState<TooltipPlacement>("topLeft");
   const [filesArr, setFilesArr] = useState<FileInfo[]>(directory);
+  const [update, setUpdate] = useState<number>(updateNum);
+
+  function forceUpdate() {
+    setUpdate(++updateNum);
+  }
 
   let contentWidget;
 
@@ -208,55 +217,145 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
     axios
       .get("http://localhost:4000/directory")
       .then((json) => {
-        console.log(json.data);
-
         json.data.sort((a: FileInfo, b: FileInfo) => {
           if (a.isDirectory) return -1;
           else if (b.isDirectory) return 0;
           return 1;
         });
 
-        setFilesArr(json.data);
+        directory = json.data;
+        setFilesArr(directory);
       })
-      .catch((error) => console.log(error));
+      .catch((err) => {
+        openNotification({
+          message: <Text type="danger">Files fetch error.</Text>,
+          description:
+            "Unexpected error on server! Try to reload page.\n" + err,
+          type: "error",
+        });
+      });
+
+    axios
+      .get("http://localhost:4000/chat_messages")
+      .then((json) => {
+        messages = json.data;
+        setMessageArr(messages);
+        setMesssageCount(messages.length);
+      })
+      .catch((err) => {
+        openNotification({
+          message: <Text type="danger">Chat messages fetch error.</Text>,
+          description:
+            "Unexpected error on server! Try to reload page.\n" + err,
+          type: "error",
+        });
+      });
+
+    Emitter.on("chat_message", (data) => {
+      messages.push(data);
+
+      if (isOpenedToolVar) {
+        if (openedToolVar !== "chat") {
+          newMessages++;
+          setMesssageCount(newMessages);
+        }
+      } else {
+        newMessages++;
+        setMesssageCount(newMessages);
+      }
+
+      setMessageArr(messages);
+      forceUpdate();
+    });
+
+    Emitter.on("editor_data_broadcast", (data) => {
+      directory.forEach((item) => {
+        if (item.path === data.file) {
+          item.content = data.value;
+
+          setFilesArr(directory);
+        }
+      });
+
+      if (Context.fileManagerOpenedFile.path === data.file) {
+        Context.fileManagerOpenedFile.content = data.value;
+        Emitter.emit("editor_update", data);
+      }
+    });
   }, []);
 
-  const tools: Tool[] = [
-    { icon: <FileOutlined />, name: "file" },
-    {
-      icon: (
-        <Badge
-          className={Style.Badge}
-          count={messageCount}
-          overflowCount={100}
-          size="small"
-          offset={[-5, 0]}
-          title={"Unread messages"}
-        >
-          <WechatOutlined className={Style.ToolPanel_Icons} />
-        </Badge>
-      ),
-      name: "chat",
-    },
-    { icon: <CameraOutlined />, name: "camera" },
-    { icon: <SettingOutlined />, name: "settings" },
-    {
-      icon: (
-        <Badge
-          className={Style.Badge}
-          count={noticeCount}
-          overflowCount={9}
-          size="small"
-          offset={[-5, 0]}
-          title={"Unread messages"}
-        >
-          <BellOutlined className={Style.ToolPanel_Icons} />
-        </Badge>
-      ),
-      name: "notice",
-    },
-    { icon: <BookOutlined />, name: "closed_notice" },
-  ];
+  const tools: Tool[] =
+    VIEW_TYPE === "streamer"
+      ? [
+          { icon: <FileOutlined />, name: "file" },
+          {
+            icon: (
+              <Badge
+                className={Style.Badge}
+                count={messageCount}
+                overflowCount={100}
+                size="small"
+                offset={[-5, 0]}
+                title={"Unread messages"}
+              >
+                <WechatOutlined className={Style.ToolPanel_Icons} />
+              </Badge>
+            ),
+            name: "chat",
+          },
+          { icon: <CameraOutlined />, name: "camera" },
+          { icon: <SettingOutlined />, name: "settings" },
+          {
+            icon: (
+              <Badge
+                className={Style.Badge}
+                count={noticeCount}
+                overflowCount={9}
+                size="small"
+                offset={[-5, 0]}
+                title={"Unread messages"}
+              >
+                <BellOutlined className={Style.ToolPanel_Icons} />
+              </Badge>
+            ),
+            name: "notice",
+          },
+          { icon: <BookOutlined />, name: "closed_notice" },
+        ]
+      : [
+          { icon: <FileOutlined />, name: "file" },
+          {
+            icon: (
+              <Badge
+                className={Style.Badge}
+                count={messageCount}
+                overflowCount={100}
+                size="small"
+                offset={[-5, 0]}
+                title={"Unread messages"}
+              >
+                <WechatOutlined className={Style.ToolPanel_Icons} />
+              </Badge>
+            ),
+            name: "chat",
+          },
+          {
+            icon: (
+              <Badge
+                className={Style.Badge}
+                count={noticeCount}
+                overflowCount={9}
+                size="small"
+                offset={[-5, 0]}
+                title={"Unread messages"}
+              >
+                <BellOutlined className={Style.ToolPanel_Icons} />
+              </Badge>
+            ),
+            name: "notice",
+          },
+          { icon: <BookOutlined />, name: "closed_notice" },
+        ];
 
   Context.placement = "topLeft";
 
@@ -269,8 +368,9 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
 
     const notice = getNoticeFromId(id);
 
-    if (Context.fileManagerOpenedFile.path !== notice.currentFile)
+    if (Context.fileManagerOpenedFile.path !== notice.currentFile) {
       Emitter.emit("notice_open_file", { path: notice.currentFile });
+    }
 
     Editor.revealLineInCenter(getNoticeFromId(id).position.startLineNumber, 0);
 
@@ -345,20 +445,33 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
 
   const openToolPanel = (id: string) => {
     setOpenedTool(id);
+    openedToolVar = id;
     setIsOpened(true);
+    isOpenedToolVar = true;
     setSize({ width: TOOL_PANEL_WIDTH + "px", height: "100%" });
+
+    if (openedToolVar === "chat") {
+      newMessages = 0;
+      setMesssageCount(newMessages);
+    }
   };
 
   const closeToolPanel = () => {
     setSize({ width: "0px", height: "100%" });
     setIsOpened(false);
+    isOpenedToolVar = false;
   };
 
   const onIconClick = (e: any, id: string) => {
     if (isOpened) {
-      if (openedTool != id) openToolPanel(id);
-      else closeToolPanel();
-    } else openToolPanel(id);
+      if (openedTool != id) {
+        openToolPanel(id);
+        openedToolVar = id;
+      } else closeToolPanel();
+    } else {
+      openToolPanel(id);
+      openedToolVar = id;
+    }
   };
 
   const createNotice = (values: any) => {
@@ -391,6 +504,8 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
       case "chat":
         return (
           <Chat
+            key={update}
+            sourceMessages={messages}
             messages={messageArr}
             setMessageArr={setMessageArr}
             setMessageCount={setMesssageCount}

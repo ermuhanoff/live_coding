@@ -13,7 +13,7 @@ import {
 import { DiHtml5, DiCss3, DiJavascript1 } from "react-icons/di";
 import { GrDocumentTxt } from "react-icons/gr";
 import { AntTreeNode } from "antd/lib/tree";
-import { Emitter } from "../App/App";
+import { Emitter, VIEW_TYPE } from "../App/App";
 const { DirectoryTree } = Tree;
 
 interface Props {
@@ -44,10 +44,10 @@ class TreeDataItem implements TreeData {
       <ContextMenu
         data={[
           { el: "Open", disabled: false, last: true, id: 0 },
-          { el: "Cut", disabled: false, last: false, id: 1 },
-          { el: "Copy", disabled: false, last: true, id: 2 },
-          { el: "Rename", disabled: false, last: false, id: 3 },
-          { el: "Delete", disabled: false, last: true, id: 4 },
+          { el: "Cut", disabled: !isStreamer(), last: false, id: 1 },
+          { el: "Copy", disabled: !isStreamer(), last: true, id: 2 },
+          { el: "Rename", disabled: !isStreamer(), last: false, id: 3 },
+          { el: "Delete", disabled: !isStreamer(), last: true, id: 4 },
         ]}
         action={[openFile, cutFile, copyFile, renameFile, deleteFile]}
         fileItem={this}
@@ -56,6 +56,10 @@ class TreeDataItem implements TreeData {
       </ContextMenu>
     );
   }
+}
+
+function isStreamer(): boolean {
+  return VIEW_TYPE === "streamer";
 }
 
 function openFile(e: any, fileItem: TreeData) {
@@ -73,7 +77,7 @@ const FileManager = ({ data, setExpanded, expanded }: Props) => {
 
   useEffect(() => {
     Emitter.on("notice_open_file", (e) => {
-      openFileByPath(e.path);
+      openFileByPath(e.path); 
     });
   }, []);
 

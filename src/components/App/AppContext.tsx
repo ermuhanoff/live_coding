@@ -26,7 +26,8 @@ export const Context = {
   isSrcollEventActive: false,
   fileManagerOpenedFile: { content: "" } as FileInfo,
   decorations: [] as string[],
-  placement: "topLeft" as TooltipPlacement
+  placement: "topLeft" as TooltipPlacement,
+  username: ""
 };
 
 export type AppContextType = typeof Context;

@@ -6,6 +6,7 @@ import {
   CloseCircleOutlined,
 } from "@ant-design/icons";
 import { NoticeItem } from "../ToolPanel/ToolPanel";
+import { VIEW_TYPE } from "../App/App";
 
 const { Meta } = Card;
 
@@ -27,10 +28,14 @@ const Notice = ({ data, closeNotice, openNotice }: Props) => {
     <>
       <Card
         size="small"
-        actions={[
-          <CodeOutlined key="code" onClick={onCodeClick} />,
-          <CloseCircleOutlined key="close" onClick={onCloseClick} />,
-        ]}
+        actions={
+          VIEW_TYPE === "streamer"
+            ? [
+                <CodeOutlined key="code" onClick={onCodeClick} />,
+                <CloseCircleOutlined key="close" onClick={onCloseClick} />,
+              ]
+            : [ <CodeOutlined key="code" onClick={onCodeClick} />]
+        }
       >
         <Meta
           avatar={<Avatar icon={<UserOutlined />} />}

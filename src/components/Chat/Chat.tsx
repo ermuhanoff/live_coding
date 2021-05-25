@@ -5,30 +5,54 @@ import { Input, Button } from "antd";
 import Draggable from "react-draggable";
 import { Message } from "../ToolPanel/ToolPanel";
 import * as Scroll from "react-scroll";
+import { Emitter } from "../App/App";
+import { Context } from "../App/AppContext";
 
 const { TextArea } = Input;
 
 interface Props {
   messages: Message[];
+  sourceMessages: Message[];
   setMessageArr: (value: Message[]) => void;
   setMessageCount: (value: number) => void;
 }
 
-const Chat = ({ messages, setMessageArr, setMessageCount }: Props) => {
+const Chat = ({
+  messages,
+  setMessageArr,
+  setMessageCount,
+  sourceMessages,
+}: Props) => {
   const [inputText, setInputText] = useState<string>("");
 
-  const messgeToReactNode = (messages: Message[]) => {
-    return messages.map((item) => (
-      <ChatMessage content={item.content} title={item.title} />
+  const messageToReactNode = (messages: Message[]) => {
+    return messages.map((item, index) => (
+      <ChatMessage
+        content={item.content}
+        title={item.title}
+        date={item.date}
+        key={index}
+      />
     ));
   };
 
   useEffect(() => {
-    Scroll.scroller.scrollTo("scrollPoint", {
-      duration: 500,
+    Scroll.scroller.scrollTo("scrollPointChat", {
+      duration: 0,
       delay: 0,
       smooth: true,
-      containerId: "scroll",
+      containerId: "scrollChat",
+    });
+
+    Emitter.on("chat_message", (data) => {
+      // sourceMessages.push(data);
+      // setMessageArr(sourceMessages);
+      Scroll.scroller.scrollTo("scrollPointChat", {
+        duration: 0,
+        delay: 0,
+        smooth: true,
+        containerId: "scrollChat",
+      });
     });
   }, []);
 
@@ -36,23 +60,29 @@ const Chat = ({ messages, setMessageArr, setMessageCount }: Props) => {
     e.preventDefault();
 
     if (inputText !== "") {
-      setMessageArr([...messages, { content: inputText, title: "Server" }]);
-      setMessageCount(messages.length + 1);
-      setInputText("");
-      Scroll.scroller.scrollTo("scrollPoint", {
+      const message = {
+        content: inputText,
+        title: Context.username,
+        date: new Date().toLocaleString(),
+      };
+      sourceMessages.push(message);
+      setMessageArr(sourceMessages);
+      Scroll.scroller.scrollTo("scrollPointChat", {
         duration: 500,
         delay: 0,
         smooth: true,
-        containerId: "scroll",
+        containerId: "scrollChat",
       });
+      Emitter.emit("new_chat_message", message);
+      setInputText("");
     }
   };
 
   return (
     <div className={Style.Chat}>
-      <div className={Style.Messages} id="scroll">
-        {messgeToReactNode(messages)}
-        {<Scroll.Element name="scrollPoint" />}
+      <div className={Style.Messages} id="scrollChat">
+        {messageToReactNode(messages)}
+        {<Scroll.Element name="scrollPointChat" />}
       </div>
       <div className={Style.Input}>
         <TextArea
