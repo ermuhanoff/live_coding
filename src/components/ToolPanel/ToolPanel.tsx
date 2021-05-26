@@ -24,6 +24,7 @@ import { Emitter, socketRef, VIEW_TYPE } from "../App/App";
 import { TooltipPlacement } from "antd/lib/tooltip";
 import axios from "axios";
 import { openNotification } from "../Notification/Notification";
+import { Resizable } from "re-resizable";
 
 interface Props {
   setToolPanelSize: (state: any) => any;
@@ -60,103 +61,9 @@ interface Tool {
 }
 
 const { Text } = Typography;
-const closedData: NoticeItem[] = [
-  {
-    id: 6,
-    title: "Очень непонятно!",
-    desc: "Можешь ещё раз объяснить что тут. Я всё пропустил.",
-    author: "Kolya",
-    position: {
-      startLineNumber: 4,
-      endLineNumber: 5,
-      startColumn: 4,
-      endColumn: 6,
-    },
-    currentFile:
-      "C:\\Users\\ermuh\\Documents\\js_projects\\live_coding_server\\root\\scripts\\index.js",
-  },
-  {
-    id: 7,
-    title: "А что делает этот участок кода?",
-    desc: "Я понял, что возвращаемое значение не определено, но как не падает ошибка?\nЭто здесь реализованно или как?",
-    author: "Olga",
-    position: {
-      startLineNumber: 40,
-      endLineNumber: 40,
-      startColumn: 60,
-      endColumn: 60,
-    },
-    currentFile: "/script/index.js",
-  },
-  {
-    id: 8,
-    title: "Аааа! Как это работает?",
-    desc: "Голова кипит! Пж, расскажи как это получется.\nНичего не понимаю, помоги!",
-    author: "Dasha",
-    position: {
-      startLineNumber: 55,
-      endLineNumber: 55,
-      startColumn: 12,
-      endColumn: 34,
-    },
-    currentFile: "/script/index.js",
-  },
-];
-const data: NoticeItem[] = [
-  {
-    id: 1,
-    title: "Что в этой строчке кода?",
-    desc: "Никак немогу разобраться. Объясни плиз!",
-    author: "Dima",
-    position: {
-      startLineNumber: 7,
-      endLineNumber: 12,
-      startColumn: 10,
-      endColumn: 10,
-    },
-    currentFile: "/script/index.js",
-  },
-  {
-    id: 2,
-    title: "А это работает везде так?",
-    desc: "А если заначения будут другими или контест поменяется?\nВожможно ли падение ошибки?",
-    author: "Danya",
-    position: {
-      startLineNumber: 1,
-      endLineNumber: 3,
-      startColumn: 12,
-      endColumn: 12,
-    },
-    currentFile: "/script/index.js",
-  },
-  {
-    id: 3,
-    title: "Хах, прикольно",
-    desc: "Очень интересно написано. Правда рефакторинг трудный будет.",
-    author: "Vova",
-    position: {
-      startLineNumber: 23,
-      endLineNumber: 23,
-      startColumn: 23,
-      endColumn: 23,
-    },
-    currentFile: "/script/index.js",
-  },
-  {
-    id: 4,
-    title: "Что-то странное",
-    desc: "Очень странное поведение тут. Возможно из-за пееременной... Или возможно, контекст не тот.\nПопробуй проверь",
-    author: "Oleg",
-    position: {
-      startLineNumber: 45,
-      endLineNumber: 45,
-      startColumn: 2,
-      endColumn: 2,
-    },
-    currentFile: "/script/index.js",
-  },
-];
 
+let closedNotices: NoticeItem[] = [];
+let notices: NoticeItem[] = [];
 let messages: Message[] = [];
 let directory: FileInfo[] = [];
 let openedToolVar: string = "";
@@ -173,12 +80,12 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
   const [isOpened, setIsOpened] = useState<boolean>(false);
   const [isNoticeOpened, setIsNoticeOpened] = useState<boolean>(false);
   const [openedTool, setOpenedTool] = useState<string>("");
-  const [noticeCount, setNoticeCount] = useState<number>(data.length);
+  const [noticeCount, setNoticeCount] = useState<number>(notices.length);
   const [messageCount, setMesssageCount] = useState<number>(newMessages);
   const [messageArr, setMessageArr] = useState<Message[]>(messages);
   const [closedNoticeArr, setClosedNoticeArr] =
-    useState<NoticeItem[]>(closedData);
-  const [noticeArr, setNoticeArr] = useState<NoticeItem[]>(data);
+    useState<NoticeItem[]>(closedNotices);
+  const [noticeArr, setNoticeArr] = useState<NoticeItem[]>(notices);
   const [openedNoticeId, setOpenedNoticeId] = useState<number>(0);
   const [size, setSize] = useState<Size>({ width: "0px", height: "100%" });
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
@@ -251,6 +158,37 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
         });
       });
 
+    axios
+      .get("http://localhost:4000/notices")
+      .then((json) => {
+        notices = json.data;
+        setNoticeArr(notices);
+        setNoticeCount(notices.length);
+      })
+      .catch((err) => {
+        openNotification({
+          message: <Text type="danger">Notices fetch error.</Text>,
+          description:
+            "Unexpected error on server! Try to reload page.\n" + err,
+          type: "error",
+        });
+      });
+
+    axios
+      .get("http://localhost:4000/closednotices")
+      .then((json) => {
+        closedNotices = json.data;
+        setClosedNoticeArr(closedNotices);
+      })
+      .catch((err) => {
+        openNotification({
+          message: <Text type="danger">Closed notices fetch error.</Text>,
+          description:
+            "Unexpected error on server! Try to reload page.\n" + err,
+          type: "error",
+        });
+      });
+
     Emitter.on("chat_message", (data) => {
       messages.push(data);
 
@@ -282,7 +220,43 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
         Emitter.emit("editor_update", data);
       }
     });
+
+    if (VIEW_TYPE === "streamer") {
+      Emitter.on("editor_update_self", (data) => {
+        console.log("here");
+        
+        directory.forEach((item) => {
+          if (item.path === data.file) {
+            item.content = data.value;
+
+            setFilesArr(directory);
+          }
+        });
+      });
+    }
+
+    Emitter.on("closed_notice", (data) => {
+      notices = notices.filter((item) => item.id !== data.id);
+      closedNotices.unshift(data);
+
+      setNoticeArr(notices);
+      setNoticeCount(notices.length);
+      setClosedNoticeArr(closedNotices);
+    });
+
+    Emitter.on("created_notice", (data) => {
+      notices.unshift(data);
+
+      setNoticeArr(notices);
+      setNoticeCount(notices.length);
+    });
   }, []);
+
+  function setSourceNotices(noticesArr: NoticeItem[]): NoticeItem[] {
+    notices = noticesArr;
+
+    return notices;
+  }
 
   const tools: Tool[] =
     VIEW_TYPE === "streamer"
@@ -386,6 +360,7 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
     }
 
     setPlacement(Context.placement);
+    console.log(notice);
 
     contentWidget = {
       getId: function () {
@@ -449,6 +424,7 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
     setIsOpened(true);
     isOpenedToolVar = true;
     setSize({ width: TOOL_PANEL_WIDTH + "px", height: "100%" });
+    // setToolPanelSize({ width: TOOL_PANEL_WIDTH + "px", height: "100%" });
 
     if (openedToolVar === "chat") {
       newMessages = 0;
@@ -457,6 +433,7 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
   };
 
   const closeToolPanel = () => {
+    // setToolPanelSize({ width: "50px", height: "100%" });
     setSize({ width: "0px", height: "100%" });
     setIsOpened(false);
     isOpenedToolVar = false;
@@ -477,18 +454,21 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
   const createNotice = (values: any) => {
     const author: string = "Han Solo";
     const pos = Context.noticePos;
-    setNoticeArr([
-      ...noticeArr,
-      {
-        id: noticeArr.length + closedNoticeArr.length + 1,
-        title: values.Question,
-        desc: values.Description,
-        author,
-        position: pos,
-        currentFile: Context.fileManagerOpenedFile.path,
-      },
-    ]);
-    setNoticeCount(noticeArr.length + 1);
+    const notice = {
+      id: noticeArr.length + closedNoticeArr.length + 1,
+      title: values.Question,
+      desc: values.Description,
+      author,
+      position: pos,
+      currentFile: Context.fileManagerOpenedFile.path,
+    };
+
+    notices.unshift(notice);
+
+    setNoticeArr(notices);
+    setNoticeCount(notices.length);
+
+    Emitter.emit("create_notice", notice);
   };
 
   const getToolComponentByName = (name: string): ReactNode => {
@@ -515,6 +495,9 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
         return (
           <NotificationPanel
             data={noticeArr}
+            setSourceNotices={setSourceNotices}
+            sourceNotices={notices}
+            sourceClosedNotices={closedNotices}
             setNoticeCount={setNoticeCount}
             setClosedNoticeArr={setClosedNoticeArr}
             setNoticeArr={setNoticeArr}
@@ -537,6 +520,8 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
     )[0];
   };
 
+  let toolPanelRezisable: any;
+
   return (
     <div className={Style.Wrapper}>
       <Space
@@ -546,9 +531,33 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
       >
         {toolsToComponents(tools)}
       </Space>
-      <div className={Style.ToolPanel_OpenedTool} style={{ ...size }}>
+      <Resizable
+        ref={(c) => {
+          toolPanelRezisable = c;
+        }}
+        enable={{
+          top: false,
+          right: true,
+          bottom: false,
+          left: false,
+          topRight: false,
+          bottomRight: false,
+          bottomLeft: false,
+          topLeft: false,
+        }}
+        defaultSize={{ width: 0, height: "100%" }}
+        size={size}
+        minWidth={0}
+        maxWidth={250}
+        onResizeStop={(e, direction, ref, d) => {
+          setSize({
+            width: parseInt(size.width) + d.width + "px",
+            height: "100%",
+          });
+        }}
+      >
         {getToolComponentByName(openedTool)}
-      </div>
+      </Resizable>
 
       {isNoticeOpened && (
         <>

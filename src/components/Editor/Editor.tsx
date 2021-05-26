@@ -58,11 +58,14 @@ const EditorComponent = () => {
   }
 
   const onChange = (value: any, ev: any): void => {
-    setValue(value);
-    socketRef.current?.emit("editor_data", {
+    const file = {
       value,
       file: Context.fileManagerOpenedFile.path,
-    });
+    };
+
+    setValue(value);
+    socketRef.current?.emit("editor_data", file);
+    Emitter.emit("editor_update_self", file);
   };
 
   const handleEditorDidMount = (
@@ -92,26 +95,20 @@ const EditorComponent = () => {
       },
     });
 
-    editor.addAction({
-      id: "saveAaction",
-      label: "Save Current File",
-      contextMenuGroupId: "9_cutcopypaste",
-      contextMenuOrder: 0,
-      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S],
-      run: (editor: EditorDidMountParams[0]) => {
-        if (VIEW_TYPE === "streamer") {
+    if (VIEW_TYPE === "streamer") {
+      editor.addAction({
+        id: "saveAaction",
+        label: "Save Current File",
+        contextMenuGroupId: "9_cutcopypaste",
+        contextMenuOrder: 0,
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S],
+        run: (editor: EditorDidMountParams[0]) => {
           axios
             .post("http://localhost:4000/savefile", {
               filePath: Context.fileManagerOpenedFile.path,
               content: editor.getValue(),
             })
             .then(() => {
-              // openNotification({
-              //   message: "File saved!",
-              //   description: "File saved at " + new Date().toLocaleString(),
-              //   type: "success",
-              // });
-
               Emitter.emit("output_reload");
             })
             .catch(() => {
@@ -121,9 +118,9 @@ const EditorComponent = () => {
                 type: "error",
               });
             });
-        }
-      },
-    });
+        },
+      });
+    }
 
     editor.updateOptions({
       roundedSelection: true,

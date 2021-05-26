@@ -13,7 +13,7 @@ const ClosedNotificationPanel = ({ data, openNotice }: Props) => {
   return (
     <div className={Style.Notice}>
       <List
-        dataSource={data}
+        dataSource={data.reverse()}
         renderItem={(item) => (
           <div className={Style.Notice_Wrapper}>
             <ClosedNotice data={item} openNotice={openNotice}/>

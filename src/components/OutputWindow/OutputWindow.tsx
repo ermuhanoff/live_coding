@@ -110,7 +110,7 @@ const OutputWindow = () => {
     <div style={{ width: "100%", height: "100%", backgroundColor: "#fff" }}>
       <iframe
         ref={ref}
-        src="http://localhost:4000/"
+        src="http://localhost:4000/static/"
         frameBorder="0"
         style={{ width: "100%", height: iframeHeight, overflow: "overlay" }}
         key={state}
