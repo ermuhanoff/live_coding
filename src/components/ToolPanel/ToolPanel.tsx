@@ -148,6 +148,7 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
         messages = json.data;
         setMessageArr(messages);
         setMesssageCount(messages.length);
+        newMessages = messages.length;
       })
       .catch((err) => {
         openNotification({
