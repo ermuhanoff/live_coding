@@ -1,11 +1,11 @@
 .Notice {
-    width: 100%;
-    height: 100%;
-    overflow: overlay;
-    background-color: #fff;
-  }
+  width: 100%;
+  height: 100%;
+  overflow: overlay;
+  min-width: 250px;
+}
 
 .Notice_Wrapper {
-    padding: 10px;
-    padding-bottom: 0px;
+  padding: 10px;
+  padding-bottom: 0px;
 }

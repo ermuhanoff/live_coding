@@ -2,6 +2,7 @@ import React from "react";
 import { Comment, Avatar } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import Style from "./ChatMessage.module.css";
+import AppStyle from "../App/App.module.css";
 
 interface Props {
   title: string;
@@ -11,7 +12,7 @@ interface Props {
 
 const ChatMessage = ({ title, content, date }: Props) => {
   return (
-    <div className={Style.ChatMessage}>
+    <div className={`${Style.ChatMessage} ${AppStyle.Dark}`}>
       <Comment
         author={title}
         avatar={<Avatar icon={<UserOutlined />} />}

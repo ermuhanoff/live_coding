@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { List } from "antd";
 import ClosedNotice from "../ClosedNotice/ClosedNotice";
 import Style from "./ClosedNotificationPanel.module.css";
+import AppStyle from "../App/App.module.css";
 import { NoticeItem } from "../ToolPanel/ToolPanel";
 
 interface Props {
@@ -11,7 +12,7 @@ interface Props {
 
 const ClosedNotificationPanel = ({ data, openNotice }: Props) => {
   return (
-    <div className={Style.Notice}>
+    <div className={`${Style.Notice} ${AppStyle.Dark}`}>
       <List
         dataSource={data.reverse()}
         renderItem={(item) => (

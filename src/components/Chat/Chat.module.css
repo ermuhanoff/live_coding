@@ -1,16 +1,21 @@
 .Chat {
-  width: 100%;
+  width: 250px;
   height: 100%;
+  min-width: max-content;
+  display: flex;
+  flex-direction: column;
 }
 
 .Messages {
-  overflow: auto;
-  overflow-x: hidden;
-  height: 65%;
+  overflow: overlay;
+}
+
+.Messages::-webkit-scrollbar {
+  width: 15px;
 }
 
 .Input {
-  height: 35%;
   padding: 10px 15px;
+  width: 250px;
 }
 

@@ -3,6 +3,7 @@ import { Typography } from "antd";
 import { Emitter } from "../App/App";
 import * as Scroll from "react-scroll";
 import Style from "./OutputWindow.module.css";
+import AppStyle from "../App/App.module.css";
 import {
   ClearOutlined,
   VerticalAlignBottomOutlined,
@@ -83,6 +84,8 @@ const OutputWindow = () => {
       }
     });
 
+    // ref.current?.contentDocument?.
+
     return () => {
       Emitter.off("output_reload", handler);
     };
@@ -107,23 +110,24 @@ const OutputWindow = () => {
   };
 
   return (
-    <div style={{ width: "100%", height: "100%", backgroundColor: "#fff" }}>
+    <div style={{ width: "100%", height: "100%" }} className={AppStyle.Dark}>
       <iframe
+        className={Style.Iframe}
         ref={ref}
         src="http://localhost:4000/static/"
         frameBorder="0"
-        style={{ width: "100%", height: iframeHeight, overflow: "overlay" }}
+        style={{ width: "100%", height: iframeHeight }}
         key={state}
         id={"iframe"}
       ></iframe>
 
       <div
-        className={Style.Console}
+        className={`${Style.Console} ${AppStyle.Dark}`}
         style={{
           height: "20%",
         }}
       >
-        <div className={Style.ConsoleMenu}>
+        <div className={`${Style.ConsoleMenu} ${AppStyle.DarkSecond}`}>
           <Text
             type="secondary"
             style={{ color: "rgba(190, 190, 190, 0.623)", margin: "0px 5px" }}

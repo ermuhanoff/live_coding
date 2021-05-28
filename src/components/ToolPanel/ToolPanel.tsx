@@ -14,6 +14,7 @@ import {
   BookOutlined,
 } from "@ant-design/icons";
 import Style from "./ToolPanel.module.css";
+import AppStyle from "../App/App.module.css";
 import { Editor, Monaco, scrollInfo } from "../Editor/Editor";
 import EditorNotice from "../EditorNotice/EditorNotice";
 import { Context, useAppContext } from "../App/AppContext";
@@ -225,7 +226,7 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
     if (VIEW_TYPE === "streamer") {
       Emitter.on("editor_update_self", (data) => {
         console.log("here");
-        
+
         directory.forEach((item) => {
           if (item.path === data.file) {
             item.content = data.value;
@@ -524,9 +525,9 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
   let toolPanelRezisable: any;
 
   return (
-    <div className={Style.Wrapper}>
+    <div className={`${Style.Wrapper}`}>
       <Space
-        className={`${Style.ToolPanel_Icons} ${Style.ToolPanel_Space}`}
+        className={`${Style.ToolPanel_Icons} ${Style.ToolPanel_Space} ${AppStyle.Dark}`}
         style={{ width: 50, minWidth: 50 }}
         direction="vertical"
       >
@@ -547,6 +548,11 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
           topLeft: false,
         }}
         defaultSize={{ width: 0, height: "100%" }}
+        style={{
+          transition: "width 0.35s ease",
+          overflow: "overlay",
+          backgroundColor: "#1b1b1b",
+        }}
         size={size}
         minWidth={0}
         maxWidth={250}

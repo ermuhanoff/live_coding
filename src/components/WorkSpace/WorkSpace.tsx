@@ -50,38 +50,18 @@ const WorkSpace = () => {
 
   function updateToolPanelSize(size: Size): void {
     setToolPanelSize(size);
-    
+
     toolPanelRezisable.updateSize(size);
   }
 
   return (
     <div className={Style.WorkSpace}>
-      {/* <Resizable
-        ref={(c) => {
-          toolPanelRezisable = c;
-        }}
-        enable={enable}
-        defaultSize={defToolPanelSize}
-        size={toolPanelSize}
-        minWidth={50}
-        maxWidth={250}
-        onResizeStop={(e, direction, ref, d) => {
-          setToolPanelSize({
-            width: parseInt(toolPanelSize.width) + d.width + "px",
-            height: "100%",
-          });
-        }}
-      > */}
-        {/* <WorkSpaceItem size={{ width: "100%", height: "100%" }}>
-          <ToolPanel setToolPanelSize={updateToolPanelSize} />
-        </WorkSpaceItem> */}
-        <WorkSpaceItem size={toolPanelSize}>
-          <ToolPanel setToolPanelSize={setToolPanelSize} />
-        </WorkSpaceItem>
-      {/* </Resizable> */}
+      <WorkSpaceItem size={toolPanelSize}>
+        <ToolPanel setToolPanelSize={setToolPanelSize} />
+      </WorkSpaceItem>
       <Resizable
+        style={{ backgroundColor: "#1b1b1b", flexGrow: 1 }}
         size={editorSize}
-        style={{ flexGrow: 1 }}
         enable={enable}
         defaultSize={editorSize}
         onResizeStop={(e, direction, ref, d) => {
@@ -96,6 +76,7 @@ const WorkSpace = () => {
         </WorkSpaceItem>
       </Resizable>
       <Resizable
+        style={{ backgroundColor: "#1b1b1b" }}
         size={outputSize}
         enable={{ ...enable, left: true, right: false }}
         defaultSize={outputSize}

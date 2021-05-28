@@ -1,6 +1,7 @@
 import React, { useState, ReactNode, useEffect } from "react";
 import ChatMessage from "../ChatMessage/ChatMessage";
 import Style from "./Chat.module.css";
+import AppStyle from "../App/App.module.css";
 import { Input, Button } from "antd";
 import Draggable from "react-draggable";
 import { Message } from "../ToolPanel/ToolPanel";
@@ -8,7 +9,7 @@ import * as Scroll from "react-scroll";
 import { Emitter } from "../App/App";
 import { Context } from "../App/AppContext";
 
-const { TextArea } = Input;
+const { Search } = Input;
 
 interface Props {
   messages: Message[];
@@ -79,14 +80,13 @@ const Chat = ({
   };
 
   return (
-    <div className={Style.Chat}>
-      <div className={Style.Messages} id="scrollChat">
+    <div className={`${Style.Chat} ${AppStyle.Dark}`}>
+      <div className={`${Style.Messages} ${AppStyle.DarkSecond}`} id="scrollChat">
         {messageToReactNode(messages)}
         {<Scroll.Element name="scrollPointChat" />}
       </div>
       <div className={Style.Input}>
-        <TextArea
-          showCount
+        <Search
           allowClear
           maxLength={100}
           value={inputText}
@@ -94,11 +94,11 @@ const Chat = ({
             setInputText(e.target.value);
           }}
           onPressEnter={onClick}
-          autoSize={{ maxRows: 1, minRows: 1 }}
+          enterButton="Send"
         />
-        <Button type="primary" onClick={onClick} style={{ marginTop: 10 }}>
+        {/* <Button type="primary" onClick={onClick} style={{ marginTop: 10 }}>
           Send Message
-        </Button>
+        </Button> */}
       </div>
     </div>
   );

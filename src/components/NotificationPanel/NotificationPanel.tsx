@@ -2,6 +2,7 @@ import React, { ReactNode, useEffect, useState } from "react";
 import { List } from "antd";
 import Notice from "../Notice/Notice";
 import Style from "./NotificationPanel.module.css";
+import AppStyle from "../App/App.module.css";
 import { NoticeItem } from "../ToolPanel/ToolPanel";
 import { Emitter } from "../App/App";
 interface Props {
@@ -31,10 +32,6 @@ const NotificationPanel = ({
     let newSourceNotices = setSourceNotices(sourceNotices.filter((item) => item.id !== notice?.id))
     sourceClosedNotices.unshift(notice);
 
-    console.log(notice);
-    console.log(newSourceNotices);
-    console.log(sourceClosedNotices);
-
     setNoticeArr(newSourceNotices);
     setNoticeCount(newSourceNotices.length);
     setClosedNoticeArr(sourceClosedNotices);
@@ -43,7 +40,7 @@ const NotificationPanel = ({
   };
 
   return (
-    <div className={Style.Notice}>
+    <div className={`${Style.Notice} ${AppStyle.Dark}`}>
       <List
         dataSource={data.reverse()}
         renderItem={(item) => {

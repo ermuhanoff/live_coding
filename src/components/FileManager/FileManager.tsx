@@ -2,6 +2,7 @@ import React, { ReactNode, useEffect, useState } from "react";
 import { Tree } from "antd";
 import ContextMenu from "../ContextMenu/ContextMenu";
 import Style from "./FileManager.module.css";
+import AppStyle from "../App/App.module.css";
 import { FileInfo } from "../ToolPanel/ToolPanel";
 import { Context, useAppContext } from "../App/AppContext";
 import {
@@ -169,7 +170,7 @@ const FileManager = ({ data, setExpanded, expanded }: Props) => {
   const onRightClick = (e: any) => {};
 
   return (
-    <div className={Style.FileManager}>
+    <div className={`${Style.FileManager} ${AppStyle.Dark}`}>
       <DirectoryTree
         className={Style.Tree}
         // showLine

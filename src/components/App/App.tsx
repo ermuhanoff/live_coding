@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import LayoutComponent from "../LayoutComponent/LayoutComponent";
-import "./App.css";
 import "antd/dist/antd.css";
+import 'antd/dist/antd.dark.css';
+import "./App.css";
+import "./App.less";
 import AppContext, { AppContextType, Context } from "./AppContext";
 import EventEmitter from "events";
 import { io, Socket } from "socket.io-client";
