@@ -57,8 +57,7 @@ const Chat = ({
     });
   }, []);
 
-  const onClick = (e: any) => {
-    e.preventDefault();
+  const onClick = () => {
 
     if (inputText !== "") {
       const message = {
@@ -93,12 +92,9 @@ const Chat = ({
           onChange={(e) => {
             setInputText(e.target.value);
           }}
-          onPressEnter={onClick}
           enterButton="Send"
+          onSearch={onClick}
         />
-        {/* <Button type="primary" onClick={onClick} style={{ marginTop: 10 }}>
-          Send Message
-        </Button> */}
       </div>
     </div>
   );

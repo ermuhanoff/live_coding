@@ -39,9 +39,10 @@ function App() {
   }
 
   useEffect(() => {
-    axios
-      .get("http://localhost:4000/viewtype")
-      .then((data) => {
+  //   axios
+  //     .get("http://localhost:4000/viewtype")
+  //     .then((data) => {
+    let data = {data: "stremer" as ViewType};
         VIEW_TYPE = data.data;
         // Context.username = window.prompt("Enter your name: ") || "user";
         VIEW_TYPE = window.confirm("Are you streamer") ? "streamer" : "viewer";
@@ -113,14 +114,14 @@ function App() {
             socketRef.current?.emit("close_notice", data);
           });
         }
-      })
-      .catch((err) => {
-        openNotification({
-          message: <Text type="danger">{"Connection error\n"}</Text>,
-          description: err.message,
-          type: "error",
-        });
-      });
+      // })
+      // .catch((err) => {
+      //   openNotification({
+      //     message: <Text type="danger">{"Connection error\n"}</Text>,
+      //     description: err.message,
+      //     type: "error",
+      //   });
+      // });
 
     return () => {
       socketRef.current?.disconnect();

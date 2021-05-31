@@ -1,11 +1,22 @@
+:root {
+  --back: #303030;
+  --backSecond: #252525;
+  --color: #165996;
+}
+
 .Dark {
-  background-color: #1b1b1b;
+  background-color: var(--back);
 }
 
 .DarkSecond {
-  background-color: #131313;
+  background-color: var(--backSecond);
+}
+
+.HoverText:hover {
+  cursor: pointer;
+  color: var(--color);
 }
 
 body {
-  background-color: #1b1b1b;
+  background-color: var(--back);
 }

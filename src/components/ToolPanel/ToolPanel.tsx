@@ -2,6 +2,8 @@ import React, { useState, ReactNode, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { Space, Badge, Drawer, Button, Typography } from "antd";
 import FileManager from "../FileManager/FileManager";
+import Cam from "../Cam/Cam";
+import Settings from "../Settings/Settings";
 import Chat from "../Chat/Chat";
 import NotificationPanel from "../NotificationPanel/NotificationPanel";
 import ClosedNotificationPanel from "../ClosedNotificationPanel/ClosedNotificationPanel";
@@ -267,7 +269,7 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
           {
             icon: (
               <Badge
-                className={Style.Badge}
+                className={`${Style.Badge} ${AppStyle.HoverText}`}
                 count={messageCount}
                 overflowCount={100}
                 size="small"
@@ -279,12 +281,12 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
             ),
             name: "chat",
           },
-          { icon: <CameraOutlined />, name: "camera" },
+          { icon: <CameraOutlined />, name: "cam" },
           { icon: <SettingOutlined />, name: "settings" },
           {
             icon: (
               <Badge
-                className={Style.Badge}
+                className={`${Style.Badge} ${AppStyle.HoverText}`}
                 count={noticeCount}
                 overflowCount={9}
                 size="small"
@@ -303,7 +305,7 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
           {
             icon: (
               <Badge
-                className={Style.Badge}
+                className={`${Style.Badge} ${AppStyle.HoverText}`}
                 count={messageCount}
                 overflowCount={100}
                 size="small"
@@ -318,7 +320,7 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
           {
             icon: (
               <Badge
-                className={Style.Badge}
+                className={`${Style.Badge} ${AppStyle.HoverText}`}
                 count={noticeCount}
                 overflowCount={9}
                 size="small"
@@ -362,7 +364,6 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
     }
 
     setPlacement(Context.placement);
-    console.log(notice);
 
     contentWidget = {
       getId: function () {
@@ -412,7 +413,7 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
     return tools.map((item) => (
       <div
         key={item.name}
-        className={Style.Icon}
+        className={`${Style.Icon} ${AppStyle.HoverText}`}
         onClick={(e) => onIconClick(e, item.name)}
       >
         {item.icon}
@@ -513,6 +514,10 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
             openNotice={openNotice}
           />
         );
+      case "cam":
+        return <Cam />;
+      case "settings":
+        return <Settings />;
     }
   };
 
@@ -527,7 +532,7 @@ const ToolPanel = ({ setToolPanelSize }: Props) => {
   return (
     <div className={`${Style.Wrapper}`}>
       <Space
-        className={`${Style.ToolPanel_Icons} ${Style.ToolPanel_Space} ${AppStyle.Dark}`}
+        className={`${Style.ToolPanel_Icons} ${Style.ToolPanel_Space} ${AppStyle.DarkSecond}`}
         style={{ width: 50, minWidth: 50 }}
         direction="vertical"
       >

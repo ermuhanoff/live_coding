@@ -139,12 +139,12 @@ const OutputWindow = () => {
             <ClearOutlined className={Style.Button} onClick={clearConsole} />
             {isCollaped ? (
               <VerticalAlignTopOutlined
-                className={Style.Button}
+                className={AppStyle.HoverText}
                 onClick={collapseConsole}
               />
             ) : (
               <VerticalAlignBottomOutlined
-                className={Style.Button}
+                className={AppStyle.HoverText}
                 onClick={collapseConsole}
               />
             )}
@@ -157,6 +157,7 @@ const OutputWindow = () => {
           style={{
             height: consoleOutputHeight,
             overflow: consoleOutputOverflow,
+            transition: "hieght .35s ease"
           }}
         >
           {/* <div style={{ height: "max-content" }}>{consoleValue}</div> */}

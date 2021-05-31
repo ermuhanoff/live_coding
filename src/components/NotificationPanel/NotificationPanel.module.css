@@ -3,9 +3,18 @@
   height: 100%;
   overflow: overlay;
   min-width: 250px;
+  padding-bottom: 10px;
 }
 
 .Notice_Wrapper {
   padding: 10px;
   padding-bottom: 0px;
+}
+
+.Notice_Wrapper > div {
+  border-color: #5f5f5f;
+}
+
+.Notice_Wrapper > div ul {
+  background-color: rgb(68, 68, 68);
 }

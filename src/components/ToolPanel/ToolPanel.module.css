@@ -6,7 +6,7 @@
   display: flex;
   align-items: center;
   width: 40px;
-  box-shadow: -15px 0px 15px 15px rgba(0, 0, 0, 0.158);
+  box-shadow: -15px 0px 15px 15px rgba(0, 0, 0, 0.301);
   z-index: 3;
   height: 100%;
 }

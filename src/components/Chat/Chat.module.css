@@ -8,6 +8,7 @@
 
 .Messages {
   overflow: overlay;
+  height: 615px;
 }
 
 .Messages::-webkit-scrollbar {
